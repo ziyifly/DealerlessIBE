@@ -1,0 +1,11 @@
+#define SETPLYBASE	0
+#define SETPLYERR	1
+
+#define SETSRTBASE	0
+#define SETSRTPLY	1
+#define SETSRTERR	2
+
+#define GENSHRBASE	0
+#define GENSHRPLY	1
+#define GENSHRSRT	2
+#define GENSHRERR	3
