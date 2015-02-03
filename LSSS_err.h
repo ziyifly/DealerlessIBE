@@ -2,7 +2,7 @@
 #define SETPLYERR	1
 
 #define SETSRTBASE	0
-#define SETSRTPLY	1
+#define SETSRTNULL	1
 #define SETSRTERR	2
 
 #define GENSHRBASE	0

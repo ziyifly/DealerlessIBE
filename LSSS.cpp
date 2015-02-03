@@ -1,24 +1,42 @@
-#include "dealerlessIBE.h"
+#include "LSSS.h"
 #include "LSSS_err.h"
 
-template<class SecretType,class ShareType>
-LSSS()
+int LSSSPolicy::toString(char*,size_t)
 {
-	policySet = false;
-	secretSet = false;
+	return 0;
+}
+
+int LSSSPolicy::toBinary(byte*,size_t)
+{
+	return 0;
+}
+
+template<class SecretType>
+int Share<SecretType>::toString(char*,size_t)
+{
+	return 0;
+}
+
+template<class SecretType>
+int Share<SecretType>::toBinary(byte*,size_t)
+{
+	return 0;
 }
 
 template<class SecretType,class ShareType>
-int LSSS::setPolicy(LSSSPolicy* policy)
+LSSS<SecretType,ShareType>::LSSS() : policySet(false), secretSet(false){}
+
+template<class SecretType,class ShareType>
+int LSSS<SecretType,ShareType>::setPolicy(LSSSPolicy policy)
 {
 	int err = SETPLYBASE;
-	this.policy.rowCnt = policy->rowCnt;
-	this.policy.colCnt = policy->colCnt;
+	this->policy.rowCnt = policy.rowCnt;
+	this->policy.colCnt = policy.colCnt;
 	
-	if(policy->rowCnt>0 && policy->colCnt>0)
+	if(policy.rowCnt>0 && policy.colCnt>0)
 	{
-		this.policy.A = policy->A;
-		this.policy.labels = policy->labels;
+		this->policy.A = policy.A;
+		this->policy.labels = policy.labels;
 		
 		policySet = true;
 	}
@@ -31,24 +49,23 @@ int LSSS::setPolicy(LSSSPolicy* policy)
 }
 
 template<class SecretType,class ShareType>
-int LSSS::setSecret(SecretType secret)
+int LSSS<SecretType,ShareType>::setSecretVector(SecretType* secretVector)
 {
 	int err = SETSRTBASE;
-	if(!this.policySet)
+	if(!secretVector)
 	{
-		err = SETSRTPLY;
+		err = SETSRTNULL;
 	}
 	else
 	{
-		this.r = (SecretType*)malloc(this.policy.rowCnt * sizeof(SecretType));
-		r[0] = secret;
+		this->r = secretVector;
 		secretSet = true;
 	}
 	return err;
 }
 
 template<class SecretType,class ShareType>
-int genShares(ShareType** shares,size_t* shareCnt)
+int LSSS<SecretType,ShareType>::genShares(ShareType** shares,size_t* shareCnt)
 {
 	int err = GENSHRBASE;
 	int i,j;
@@ -62,17 +79,22 @@ int genShares(ShareType** shares,size_t* shareCnt)
 	}
 	else
 	{
-		_shares = (ShareType*)malloc(policy.rowCnt * sizeof(ShareType));
-		for(i=0;i<rowCnt;i++)
+		ShareType* _shares = (ShareType*)malloc(policy.rowCnt * sizeof(ShareType));
+		
+		for(i=0;i<policy.rowCnt;i++)
 		{
-			SecretType tmp;
-			for(j=0;j<colCnt;j++)
+			SecretType tmp = 0;     //*****TODO
+			for(j=0;j<policy.colCnt;j++)
 			{
-				tmp += r[j] * policy[i][j];
+				tmp += r[j] * policy.A[i][j];
 			}
-			shares[i] = tmp;
+			_shares[i].share = tmp;
+			_shares[i].label = policy.labels[i];
 		}
 		*shares = _shares;
+		*shareCnt = policy.rowCnt;
 	}
 	return err;
 }
+
+template class LSSS<int,Share<int> >;
