@@ -1,27 +1,19 @@
+#include "Serialization.h"
 // Non-implemant classes
 
-template<class MsgType,class SigType,class VerifyKeyType>
+template<class MsgType,class SigType>
 class SignKey:public Serialization
 {
 	public:
-		virtual VerifyKeyType getVerifyKey();
-		virtual SigType sign(MsgType);
+		virtual VerifyKeyType getVerifyKey() = 0;
+		virtual SigType sign(MsgType) = 0;
 };
 
-template<class MsgType,class SigType,class SignKeyType>
+template<class MsgType,class SigType>
 class VerifyKey: public Serialization
 {
 	public:
-		virtual bool verify(MsgType,SigType);
-		
-		friend SignKeyType;
-};
-
-template<class SignKeyType,class VerifyKeyType>
-class Signature: public Serialization
-{
-	friend SignKeyType;
-	friend VerifyKeyType;
+		virtual bool verify(MsgType,SigType) = 0;
 };
 
 template<class PlaintextType,class CiphertextType,class EncryptKeyType>

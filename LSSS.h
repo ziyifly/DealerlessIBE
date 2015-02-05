@@ -8,7 +8,7 @@ struct LSSSPolicy: public Serialization
 	char** labels;
 	
 	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
+	int toBinary(byte**,size_t);
 };
 
 template<class SecretType>
@@ -18,7 +18,7 @@ struct Share: public Serialization
 	SecretType share;
 	
 	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
+	int toBinary(byte**,size_t);
 };
 
 template<class SecretType,class ShareType>

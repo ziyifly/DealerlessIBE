@@ -6,7 +6,7 @@ int LSSSPolicy::toString(char*,size_t)
 	return 0;
 }
 
-int LSSSPolicy::toBinary(byte*,size_t)
+int LSSSPolicy::toBinary(byte**,size_t)
 {
 	return 0;
 }
@@ -18,7 +18,7 @@ int Share<SecretType>::toString(char*,size_t)
 }
 
 template<class SecretType>
-int Share<SecretType>::toBinary(byte*,size_t)
+int Share<SecretType>::toBinary(byte**,size_t)
 {
 	return 0;
 }

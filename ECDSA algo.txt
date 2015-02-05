@@ -1,0 +1,22 @@
+curve,G(generator),n(order of G)
+
+sk: dA(Zn)
+vk: qA(dA * G)
+
+sign(m in {0,1}*)
+	e = hash(m)
+	z = leftLBits(e)
+	k = rnd() in Zn
+	(x1,y1) = k*G
+	r = x1 % n (if r == 0, random pick k again)
+	s = k^-1 (z+r*dA) % n (if s == 0, random pick k again)
+	
+	sig = (r,s) in (Zn,Zn)
+	
+verify(m,r,s)
+	calc z
+	w = s^-1 % n
+	u1 = z*w % n
+	u2 = r*w % n
+	(x1,y1) = u1 * G +  u2 * qA
+	verify r == x1

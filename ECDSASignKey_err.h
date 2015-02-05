@@ -1,0 +1,2 @@
+#define ECDSASIGNBASE	0
+#define ECDSASIGNINVMAG	1

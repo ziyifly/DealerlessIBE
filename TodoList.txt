@@ -1,0 +1,11 @@
+LSSS
+	randomR
+	
+VLSSS
+	setCommitments
+	VerifyShare
+	
+ECDSA
+	SignKey
+		hash and leftmostbits
+		compile
