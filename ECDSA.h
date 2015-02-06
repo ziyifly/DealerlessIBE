@@ -1,18 +1,20 @@
 #include "dealerlessIBE.h"
 #include "miracl.h"
-#include "openssl.h"
-//#include "ecn.h"
+#include "ecn.h"
 #include "big.h"
+#include "ECDSASignKey_err.h"
 
-struct ECDSASignature;
-class ECDSASignKey: SignKey<Serialization,ECDSASignature>;
-class ECDSAVerifyKey: VerifyKey<Serialization,ECDSASignature>;
+struct BinaryData
+{
+	byte* data;
+	size_t sz;
+};
 
 struct ECDSACurve
 {
 	ECn g;
 	Big n;
-}
+};
 
 struct ECDSASignature
 {
@@ -20,7 +22,23 @@ struct ECDSASignature
 	Big s;
 };
 
-class ECDSASignKey: public SignKey<Serialization,ECDSASignature>
+class ECDSAVerifyKey: public VerifyKey<BinaryData,ECDSASignature>
+{
+	private:
+		ECDSACurve curve;
+		ECn qA;
+	public:
+		ECDSAVerifyKey(char*,size_t);
+		ECDSAVerifyKey(byte*,size_t);
+		ECDSAVerifyKey(ECDSACurve,ECn);
+	
+		int toString(char*,size_t);
+		int toBinary(byte*,size_t);
+		bool verify(BinaryData,ECDSASignature);
+	friend class ECDSASignKey;
+};
+
+class ECDSASignKey: public SignKey<BinaryData,ECDSASignature>
 {
 	private:
 		ECDSACurve curve; 
@@ -33,21 +51,6 @@ class ECDSASignKey: public SignKey<Serialization,ECDSASignature>
 		
 		int toString(char*,size_t);
 		int toBinary(byte*,size_t);
-		ECDSAVerifyKey getVerifyKey();
-		ECDSASignature sign(Serialization*,int*);
-}
-
-class ECDSAVerifyKey: public VerifyKey<Serialization,ECDSASignature>
-{
-	private:
-		ECDSACurve curve;
-		ECn qA;
-	public:
-		ECDSAVerifyKey(char*,size_t);
-		ECDSAVerifyKey(byte*,size_t);
-		ECDSAVerifyKey(ECDSACurve,ECn);
-	
-		int toString(char*,size_t);
-		int toBinary(byte*,size_t);
-		bool verify(Serialization,ECDSASignature);
-}
+		int getVerifyKey(VerifyKey<BinaryData,ECDSASignature>*);
+		ECDSASignature sign(BinaryData,int*);
+};
