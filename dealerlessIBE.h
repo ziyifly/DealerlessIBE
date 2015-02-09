@@ -8,11 +8,11 @@ class VerifyKey: public Serialization
 		virtual bool verify(MsgType,SigType) = 0;
 };
 
-template<class MsgType,class SigType>
+template<class MsgType,class SigType,class VerifyKeyType>
 class SignKey:public Serialization
 {
 	public:
-		virtual int getVerifyKey(VerifyKey<MsgType,SigType>*) = 0;
+		virtual VerifyKeyType getVerifyKey() = 0;
 		virtual SigType sign(MsgType) = 0;
 };
 

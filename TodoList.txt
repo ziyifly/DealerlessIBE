@@ -6,6 +6,8 @@ VLSSS
 	VerifyShare
 	
 ECDSA
+	Unit test
 	SignKey
-		hash and leftmostbits
-		compile
+		v hash and leftmostbits
+		v compile
+	VerifyKey

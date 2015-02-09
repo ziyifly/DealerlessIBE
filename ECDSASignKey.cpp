@@ -1,20 +1,5 @@
 #include "ECDSA.h"
 
-Big HashToBig(byte* m,size_t mSz)
-{
-	char s[32];
-	Big z;
-	sha256 sh;
-	shs256_init(&sh);
-	while(mSz--)
-	{
-		shs256_process(&sh,*(m++));
-	}
-	shs256_hash(&sh,s);
-	z = from_binary(32,s);
-	return z;
-}
-
 int ECDSASignKey::toString(char*,size_t)
 {
 	return 0;
@@ -45,20 +30,16 @@ ECDSASignKey::ECDSASignKey(ECn g,Big n)
 	}while(this->dA != 1);	
 }
 
-int ECDSASignKey::getVerifyKey(VerifyKey<BinaryData,ECDSASignature>* vk)
+ECDSAVerifyKey ECDSASignKey::getVerifyKey()
 {	
-	ECDSAVerifyKey* _vk = (ECDSAVerifyKey*)vk;
-	_vk->curve.g = curve.g;
-	_vk->curve.n = curve.n;
-	_vk->qA = dA * curve.g;
-	return 0;
+	return ECDSAVerifyKey(curve,dA * curve.g);
 }
 
 ECDSASignature ECDSASignKey::sign(BinaryData msg,int* err=0)
 {
 	int _err = ECDSASIGNBASE;
 
-	Big z = HashToBig(msg.data,msg.sz);
+	Big z = HashToBig(msg);
 	
 	ECDSASignature sig;
 	do

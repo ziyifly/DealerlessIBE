@@ -1,14 +1,15 @@
+#include "ECDSASignKey_err.h"
 #include "dealerlessIBE.h"
-#include "miracl.h"
 #include "ecn.h"
 #include "big.h"
-#include "ECDSASignKey_err.h"
 
 struct BinaryData
 {
 	byte* data;
 	size_t sz;
 };
+
+Big HashToBig(BinaryData data);
 
 struct ECDSACurve
 {
@@ -38,7 +39,7 @@ class ECDSAVerifyKey: public VerifyKey<BinaryData,ECDSASignature>
 	friend class ECDSASignKey;
 };
 
-class ECDSASignKey: public SignKey<BinaryData,ECDSASignature>
+class ECDSASignKey: public SignKey<BinaryData,ECDSASignature,ECDSAVerifyKey>
 {
 	private:
 		ECDSACurve curve; 
@@ -51,6 +52,6 @@ class ECDSASignKey: public SignKey<BinaryData,ECDSASignature>
 		
 		int toString(char*,size_t);
 		int toBinary(byte*,size_t);
-		int getVerifyKey(VerifyKey<BinaryData,ECDSASignature>*);
+		ECDSAVerifyKey getVerifyKey();
 		ECDSASignature sign(BinaryData,int*);
 };
