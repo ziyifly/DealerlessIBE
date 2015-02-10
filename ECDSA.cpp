@@ -1,5 +1,12 @@
 #include "ECDSA.h"
 
+#ifdef DEBUG
+void showMsg(Big n,const char* msg)
+{
+	cout<<"log:"<<msg<<' '<<n<<endl;
+}
+#endif
+
 Big HashToBig(BinaryData data)
 {
 	char s[32];

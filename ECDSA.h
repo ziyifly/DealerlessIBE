@@ -3,6 +3,14 @@
 #include "ecn.h"
 #include "big.h"
 
+#define DEBUG
+
+#ifdef DEBUG
+#include <iostream>
+using namespace std;
+void showMsg(Big n,const char* msg);
+#endif
+
 struct BinaryData
 {
 	byte* data;
@@ -45,13 +53,12 @@ class ECDSASignKey: public SignKey<BinaryData,ECDSASignature,ECDSAVerifyKey>
 		ECDSACurve curve; 
 		Big dA;
 	public:
-		ECDSASignKey(char*,size_t);
-		ECDSASignKey(byte*,size_t);
 		ECDSASignKey(Big dA,ECn g,Big n);
 		ECDSASignKey(ECn g,Big n);
+		ECDSASignKey(ECDSACurve curve);
 		
 		int toString(char*,size_t);
 		int toBinary(byte*,size_t);
 		ECDSAVerifyKey getVerifyKey();
-		ECDSASignature sign(BinaryData,int*);
+		ECDSASignature sign(BinaryData,int* err=0);
 };
