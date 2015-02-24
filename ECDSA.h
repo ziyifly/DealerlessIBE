@@ -1,21 +1,13 @@
 #include "ECDSASignKey_err.h"
-#include "dealerlessIBE.h"
+#include "Crypto119.h"
 #include "ecn.h"
 #include "big.h"
-
-#define DEBUG
 
 #ifdef DEBUG
 #include <iostream>
 using namespace std;
 void showMsg(Big n,const char* msg);
 #endif
-
-struct BinaryData
-{
-	byte* data;
-	size_t sz;
-};
 
 Big HashToBig(BinaryData data);
 
@@ -25,10 +17,20 @@ struct ECDSACurve
 	Big n;
 };
 
-struct ECDSASignature
+class ECDSASignature: public Serialization
 {
-	Big r;
-	Big s;
+	private:
+		Big r;
+		Big s;
+		ECDSASignature();
+	
+	public:
+		int toString(char*,size_t);
+		int toBinary(byte*,size_t);
+		ECDSASignature(char*,size_t);
+		
+	friend class ECDSAVerifyKey;
+	friend class ECDSASignKey;
 };
 
 class ECDSAVerifyKey: public VerifyKey<BinaryData,ECDSASignature>

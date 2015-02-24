@@ -11,3 +11,5 @@ ECDSA
 		v hash and leftmostbits
 		v compile
 	VerifyKey
+	Signature
+		v serialization

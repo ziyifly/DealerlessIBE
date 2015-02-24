@@ -8,11 +8,14 @@ using namespace std;
 #define PUBKEY "ecsPubKey"
 #define PRIKEY "ecsPriKey"
 
+#define DEBUG
+
 Miracl precision = 20;
 
 int main()
 {
 	Big aa(3),bb(5);
+	char buf[500];
 	cout<<"inverse(3,5)="<<inverse(aa,bb)<<endl;
 	
 	ifstream common(COMMON);	/* construct file I/O streams */
@@ -79,11 +82,16 @@ int main()
 	memcpy(msg.data,"hello",6);
 	
 	ECDSASignature sig = sk.sign(msg);
-	cout<<"Sign finished"<<endl;
-	cout<<"r="<<sig.r<<endl;
-	cout<<"s="<<sig.s<<endl;
+	sig.toString(buf,500);
 	
-	bool result = vk.verify(msg,sig);
+	cout<<"Sign finished"<<endl;
+	cout<<buf<<endl;
+	
+	//cout<<sig.r<<endl;
+	//cout<<sig.s<<endl;
+	ECDSASignature sigPrime(buf,500);
+	
+	bool result = vk.verify(msg,sigPrime);
 	cout<<(result?"Verified":"Not Verified")<<endl;
 	
 	return 0;
