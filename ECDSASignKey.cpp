@@ -1,8 +1,24 @@
 #include "ECDSA.h"
 
-int ECDSASignKey::toString(char*,size_t)
+int ECDSASignKey::toString(char* buf,size_t sz)
 {
-	return 0;
+	big dA;
+	int len,i;
+	char* ptr = buf;
+	miracl *mip=get_mip();
+	
+	dA = this->dA.getbig();
+	
+	len=cotstr(dA,mip->IOBUFF);
+	
+	if(sz < len)
+		return -1;
+	for (i=0;i<len;i++) 
+		*(ptr++)=mip->IOBUFF[i];
+	*(ptr++)='\n';
+	*(ptr++)='\0';
+	
+	return ptr-buf;
 }
 
 int ECDSASignKey::toBinary(byte*,size_t)

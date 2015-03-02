@@ -13,11 +13,9 @@ using namespace std;
 Miracl precision = 20;
 
 int main()
-{
-	Big aa(3),bb(5);
+{	
 	char buf[500];
-	cout<<"inverse(3,5)="<<inverse(aa,bb)<<endl;
-	
+
 	ifstream common(COMMON);	/* construct file I/O streams */
 	//ofstream public_key(PUBKEY);
 	//ofstream private_key(PRIKEY);
@@ -93,6 +91,11 @@ int main()
 	
 	bool result = vk.verify(msg,sigPrime);
 	cout<<(result?"Verified":"Not Verified")<<endl;
+	
+	sk.toString(buf,500);
+	cout<<"SK = "<<buf<<endl;
+	vk.toString(buf,500);
+	cout<<"VK = "<<buf<<endl;
 	
 	return 0;
 }

@@ -35,14 +35,14 @@ template<class PlaintextType,class CiphertextType>
 class EncryptKey: public Serialization
 {
 	public:
-		virtual int encrypt(PlaintextType,CiphertextType) = 0;
+		virtual CiphertextType encrypt(PlaintextType) = 0;
 };
 
 template<class PlaintextType,class CiphertextType,class EncryptKeyType>
 class DecryptKey: public Serialization
 {
 	public:
-		virtual int decrypt(PlaintextType,CiphertextType) = 0;
+		virtual PlaintextType decrypt(CiphertextType) = 0;
 		virtual EncryptKeyType getEncrpytKey() = 0;
 };
 

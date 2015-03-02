@@ -6,10 +6,21 @@ VLSSS
 	VerifyShare
 	
 ECDSA
-	Unit test
 	SignKey
 		v hash and leftmostbits
 		v compile
+		v serialization(toString)
+		serialization(toBinary)
+		test
 	VerifyKey
+		v serialization(toString)
+		serialization(toBinary)
+		test
 	Signature
-		v serialization
+		v serialization(toString)
+		serialization(toBinary)
+
+ECElGamal
+	DecryptKey
+	EncryptKey
+	CipherText

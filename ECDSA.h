@@ -55,9 +55,11 @@ class ECDSASignKey: public SignKey<BinaryData,ECDSASignature,ECDSAVerifyKey>
 		ECDSACurve curve; 
 		Big dA;
 	public:
+		ECDSASignKey(char*,size_t);
+		ECDSASignKey(byte*,size_t);
 		ECDSASignKey(Big dA,ECn g,Big n);
-		ECDSASignKey(ECn g,Big n);
-		ECDSASignKey(ECDSACurve curve);
+		ECDSASignKey(ECn,Big);
+		ECDSASignKey(ECDSACurve);
 		
 		int toString(char*,size_t);
 		int toBinary(byte*,size_t);
