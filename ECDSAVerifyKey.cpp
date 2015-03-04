@@ -27,7 +27,6 @@ int ECDSAVerifyKey::toString(char* buf,size_t sz)
 	for (i=0;i<ny;i++)
 		*(ptr++)=mip->IOBUFF[i];
 	*(ptr++)=')';
-	*(ptr++)='\n';
 	*(ptr++)='\0';
 	
 	return ptr-buf;

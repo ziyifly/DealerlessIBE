@@ -1,16 +1,22 @@
 #include "ECElgamal.h"
 
+// Serialization
 int ECElgamalEncryptKey::toString(char* buf,size_t sz)
 {
+	return 0;
 }
 int ECElgamalEncryptKey::toBinary(byte*,size_t)
 {
+	return 0;
 }
-ECElgamalEncryptKey::ECElgamalEncryptKey()
-{
-}
-//...
 
+// Constructor
+ECElgamalEncryptKey::ECElgamalEncryptKey()
+{}
+ECElgamalEncryptKey(ECDSACurve curve,ECn h): curve(curve), h(h)
+{}
+
+// EncryptKey Method
 ECElgamalCiphertext ECElgamalEncryptKey::encrypt(ECn m)
 {
 	ECElgamalCiphertext ct;

@@ -15,7 +15,6 @@ int ECDSASignKey::toString(char* buf,size_t sz)
 		return -1;
 	for (i=0;i<len;i++) 
 		*(ptr++)=mip->IOBUFF[i];
-	*(ptr++)='\n';
 	*(ptr++)='\0';
 	
 	return ptr-buf;
