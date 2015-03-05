@@ -53,7 +53,7 @@ int main()
 		return 0;
 	}
 
-	ECDSACurve curve = {G,q};
+	ECElgamalCurve curve = {G,q};
 	cout<<"Curve set"<<endl;
 	cout<<G<<endl;
 	cout<<q<<endl;
@@ -70,7 +70,7 @@ int main()
 	ECElgamalCiphertext ct = ek.encrypt(msg);
 	cout<<"Msg encrpted."<<endl;
 	ct.toString(buf,500);
-	cout<<"CT = "<<ct<<endl;
+	cout<<"CT = "<<buf<<endl;
 	
 	ECn msgPrime = dk.decrypt(ct);
 	cout<<"Msg' ="<<msgPrime<<endl;

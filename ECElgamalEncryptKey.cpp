@@ -11,9 +11,7 @@ int ECElgamalEncryptKey::toBinary(byte*,size_t)
 }
 
 // Constructor
-ECElgamalEncryptKey::ECElgamalEncryptKey()
-{}
-ECElgamalEncryptKey(ECDSACurve curve,ECn h): curve(curve), h(h)
+ECElgamalEncryptKey::ECElgamalEncryptKey(ECElgamalCurve curve,ECn h): curve(curve), h(h)
 {}
 
 // EncryptKey Method
@@ -22,6 +20,7 @@ ECElgamalCiphertext ECElgamalEncryptKey::encrypt(ECn m)
 	ECElgamalCiphertext ct;
 	Big k = rand(curve.n-1);
 	ct.c1 = k*curve.g;
-	ct.c2 = m + k*h;
+	ct.c2 = m;
+	ct.c2 += k*h;
 	return ct;
 }

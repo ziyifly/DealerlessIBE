@@ -28,11 +28,13 @@ class ECElgamalEncryptKey: public EncryptKey<ECn,ECElgamalCiphertext>
 		ECElgamalCurve curve;
 		ECn h;
 	public:
+		int toString(char*,size_t);
+		int toBinary(byte*,size_t);
 		ECElgamalEncryptKey(char*,size_t);
 		ECElgamalEncryptKey(byte*,size_t);
-		ECElgamalEncryptKey(ECDSACurve,ECn);
+		ECElgamalEncryptKey(ECElgamalCurve,ECn);
 		
-		CiphertextType encrypt(ECn);
+		ECElgamalCiphertext encrypt(ECn);
 };
 
 class ECElgamalDecryptKey: public DecryptKey<ECn,ECElgamalCiphertext,ECElgamalEncryptKey>
@@ -41,6 +43,9 @@ class ECElgamalDecryptKey: public DecryptKey<ECn,ECElgamalCiphertext,ECElgamalEn
 		ECElgamalCurve curve;
 		Big x;
 	public:
+		int toString(char*,size_t);
+		int toBinary(byte*,size_t);
+		
 		ECElgamalDecryptKey(char*,size_t);
 		ECElgamalDecryptKey(byte*,size_t);
 		ECElgamalDecryptKey(Big x,ECn g,Big n);
@@ -48,5 +53,5 @@ class ECElgamalDecryptKey: public DecryptKey<ECn,ECElgamalCiphertext,ECElgamalEn
 		ECElgamalDecryptKey(ECElgamalCurve curve);
 	
 		ECn decrypt(ECElgamalCiphertext);
-		EncryptKeyType getEncrpytKey();
+		ECElgamalEncryptKey getEncrpytKey();
 };

@@ -13,29 +13,31 @@ int ECElgamalCiphertext::toString(char* buf,size_t sz)
 	c2.getxy(x2,y2);
 	
 	*(ptr++) = '(';
-	n = cotstr(x1,mip->IOBUFF);
+	n = cotstr(x1.getbig(),mip->IOBUFF);
 	if(ptr+n-buf+1 > sz)
 		return -1;
-	for (i=0;i<nr;i++)
+	for (i=0;i<n;i++)
 		*(ptr++)=mip->IOBUFF[i];
 	*(ptr++) = ',';
-	n = cotstr(x1,mip->IOBUFF);
+	n = cotstr(y1.getbig(),mip->IOBUFF);
 	if(ptr+n-buf+3 > sz)
 		return -1;
-	for (i=0;i<nr;i++)
+	for (i=0;i<n;i++)
 		*(ptr++)=mip->IOBUFF[i];
 	*(ptr++) = ')';
 	
 	*(ptr++) = '\n';
 	*(ptr++) = '(';
+	n = cotstr(x2.getbig(),mip->IOBUFF);
 	if(ptr+n-buf+1 > sz)
 		return -1;
-	for (i=0;i<nr;i++)
+	for (i=0;i<n;i++)
 		*(ptr++)=mip->IOBUFF[i];
 	*(ptr++) = ',';
+	n = cotstr(y2.getbig(),mip->IOBUFF);
 	if(ptr+n-buf+2 > sz)
 		return -1;
-	for (i=0;i<nr;i++)
+	for (i=0;i<n;i++)
 		*(ptr++)=mip->IOBUFF[i];
 	*(ptr++) = ')';
 	*(ptr++) = '\0';

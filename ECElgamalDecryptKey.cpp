@@ -11,20 +11,23 @@ int ECElgamalDecryptKey::toBinary(byte*,size_t)
 }
 
 // Constructor
-ECElgamalDecryptKey::ECElgamalDecryptKey(){}
-
-ECElgamalDecryptKey(char*,size_t){}
-ECElgamalDecryptKey(byte*,size_t){}
-ECElgamalDecryptKey(Big x,ECn g,Big n): curve({g,n}),x(x){}
-ECElgamalDecryptKey(ECn g,Big n)
+ECElgamalDecryptKey::ECElgamalDecryptKey(char*,size_t){}
+ECElgamalDecryptKey::ECElgamalDecryptKey(byte*,size_t){}
+ECElgamalDecryptKey::ECElgamalDecryptKey(Big x,ECn g,Big n): curve(),x(x)
 {
-	curve = {g,n};
+	curve.g = g;
+	curve.n = n;
+}
+ECElgamalDecryptKey::ECElgamalDecryptKey(ECn g,Big n)
+{
+	curve.g = g;
+	curve.n = n;
 	do
 	{
 		x = rand(curve.n-1);
 	}while(x.isone());
 }
-ECElgamalDecryptKey(ECElgamalCurve curve): curve(curve)
+ECElgamalDecryptKey::ECElgamalDecryptKey(ECElgamalCurve curve): curve(curve)
 {
 	do
 	{
@@ -35,7 +38,9 @@ ECElgamalDecryptKey(ECElgamalCurve curve): curve(curve)
 // DecryptKey Method
 ECn ECElgamalDecryptKey::decrypt(ECElgamalCiphertext ct)
 {
-	return ct.c2-x*ct.c1;
+	ECn tmp = ct.c2;
+	tmp += (-x)*ct.c1;
+	return tmp;
 }
 ECElgamalEncryptKey ECElgamalDecryptKey::getEncrpytKey()
 {
