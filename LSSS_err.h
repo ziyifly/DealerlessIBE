@@ -9,3 +9,7 @@
 #define GENSHRPLY	1
 #define GENSHRSRT	2
 #define GENSHRERR	3
+
+#define RECONSTRBASE	0
+#define RECONSTRLABEL	1
+#define RECONSTRELIMAT	2

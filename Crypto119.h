@@ -1,5 +1,4 @@
 #include <cstdlib>
-// Non-implemant classes
 
 typedef unsigned char byte;
 

@@ -3,7 +3,6 @@
 
 int main()
 {
-	LSSS< int,Share<int> > lsss;
 	LSSSPolicy policy;
 	
 	policy.rowCnt = 4;
@@ -25,10 +24,11 @@ int main()
 		policy.labels[i] = (char*)malloc(10*sizeof(char));
 		sprintf(policy.labels[i],"label%d",i);
 	}
-	lsss.setPolicy(policy);
+	
+	LSSS<int> lsss (policy);
 	
 	int secretVector[3] = {100,3,4};
-	lsss.setSecretVector(secretVector);
+	lsss.setR(secretVector);
 	
 	Share<int>* shares;
 	size_t shareCnt;
@@ -47,6 +47,20 @@ int main()
 	{
 		printf("%s : %d\n",shares[i].label,shares[i].share);
 	}
+	
+	printf("----- Reconstruct -----\n");
+	
+	Share<int> reShares[3] = {shares[0],shares[3],shares[1]};
+	int reSrt;
+	int err = lsss.reconstructSecret(reShares,3,&reSrt);
+	
+	for(int i=0;i<3;i++)
+	{
+		printf("%s : %d\n",reShares[i].label,reShares[i].share);
+	}
+	printf("err = %d\n",err);
+	printf("reSrt = %d\n",reSrt);
+	
 	
 	return 0;
 }
