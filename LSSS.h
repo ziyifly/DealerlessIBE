@@ -3,6 +3,30 @@
 #include <cstring>
 #include <cstdlib>
 
+struct IntGroup
+{
+	unsigned int num,n;
+	IntGroup(unsigned int num,unsigned int n);
+	
+	IntGroup& operator*=(IntGroup);
+	
+	friend IntGroup operator*(IntGroup,IntGroup);
+	friend IntGroup _pow(IntGroup,int);
+};
+
+struct BigGroup
+{
+	Big num,n;
+	
+	BigGroup(Big num,Big n);
+	
+	BigGroup& operator*=(BigGroup);
+	
+	friend BigGroup operator*(BigGroup,BigGroup);
+	friend BigGroup _pow(BigGroup,int);
+	friend BigGroup _pow(BigGroup,Big);
+};
+
 struct LSSSPolicy: public Serialization
 {
 	int** A;
@@ -46,6 +70,7 @@ class VLSSS : public LSSS<SecretType>
 	private:
 		DLType g;
 	public:
+		VLSSS(LSSSPolicy,DLType g,DLType n);
 		int getVerifiableTokens(DLType**,size_t*);
 		bool verify(Share<SecretType>);
 };
