@@ -96,7 +96,7 @@ int LSSS<SecretType>::genShares(Share<SecretType>** shares,size_t* shareCnt)
 	}
 	else
 	{
-		Share<SecretType>* _shares = (Share<SecretType>*)malloc(policy.rowCnt * sizeof(Share<SecretType>));
+		Share<SecretType>* _shares = new Share<SecretType>[policy.rowCnt];
 		
 		for(i=0;i<policy.rowCnt;i++)
 		{
