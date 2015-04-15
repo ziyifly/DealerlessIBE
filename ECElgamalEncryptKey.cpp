@@ -3,7 +3,34 @@
 // Serialization
 int ECElgamalEncryptKey::toString(char* buf,size_t sz)
 {
-	return 0;
+	Big X,Y;
+	big x,y;
+	int nx,ny,i;
+	char* ptr = buf;
+	miracl *mip=get_mip();
+	
+	this->h.get(X,Y);
+	x = X.getbig();
+	y = Y.getbig();
+	
+	nx=cotstr(x,mip->IOBUFF);
+	
+	*(ptr++)='(';
+	if(sz < (ptr+nx)-buf+2)
+		return -1;
+	for (i=0;i<nx;i++) 
+		*(ptr++)=mip->IOBUFF[i];
+	*(ptr++)=',';
+	
+	ny=cotstr(y,mip->IOBUFF);
+	if(sz < (ptr+ny)-buf+3)
+		return -1;
+	for (i=0;i<ny;i++)
+		*(ptr++)=mip->IOBUFF[i];
+	*(ptr++)=')';
+	*(ptr++)='\0';
+	
+	return ptr-buf;
 }
 int ECElgamalEncryptKey::toBinary(byte*,size_t)
 {
@@ -13,7 +40,11 @@ int ECElgamalEncryptKey::toBinary(byte*,size_t)
 // Constructor
 ECElgamalEncryptKey::ECElgamalEncryptKey(ECElgamalCurve curve,ECn h): curve(curve), h(h)
 {}
-
+/*::ECElgamalEncryptKey(char* buf,size_t)
+{
+	
+}
+*/
 // EncryptKey Method
 ECElgamalCiphertext ECElgamalEncryptKey::encrypt(ECn m)
 {

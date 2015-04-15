@@ -41,6 +41,15 @@ ECDSAVerifyKey::ECDSAVerifyKey(ECDSACurve curve,ECn qA): curve(curve), qA(qA)
 {
 }
 
+/*ECDSAVerifyKey::ECDSAVerifyKey(char* buf,size_t sz)
+{
+	char* ptr = strtok(buf,"(,)");
+	Big x(ptr);
+	ptr = strtok(NULL,"(,)");
+	Big y(ptr);
+	this->qA = ECn(x,y);
+}
+*/
 bool ECDSAVerifyKey::verify(BinaryData msg,ECDSASignature sig)
 {
 	Big z = HashToBig(msg);

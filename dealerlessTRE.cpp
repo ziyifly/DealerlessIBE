@@ -98,3 +98,24 @@ void outputToFile(const char* str,const char* fileName)
 	ofstream out(fileName);
 	out<<str<<endl;
 }
+
+size_t inputFromFile(char* buf,const char* fileName)
+{
+	char* ptr = buf;
+	FILE *in = fopen(fileName,"r");
+	while(fgets(ptr,500,in)!=NULL)
+	{
+		ptr += strlen(ptr);
+		//cout<<buf<<endl;
+	}
+	return ptr-buf;
+}
+
+ECn ECnFromStr(char* buf)
+{
+	char* ptr = strtok(buf,"(,)");
+	Big x(ptr);
+	ptr = strtok(NULL,"(,)");
+	Big y(ptr);
+	return ECn(x,y);
+}
