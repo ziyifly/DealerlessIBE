@@ -97,7 +97,7 @@ int ECGroup::toString(char* buf,size_t sz)
 	ptr+=strlen(ptr);
 	*(ptr++) = ')';
 	*(ptr++) = '\0';
-	return 0;
+	return ptr-buf;
 }
 int ECGroup::toBinary(byte*,size_t)
 {

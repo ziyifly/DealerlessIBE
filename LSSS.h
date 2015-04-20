@@ -86,9 +86,7 @@ class LSSS
 		LSSSPolicy policy;
 		SecretType* r;
 	public:
-		//LSSS();
 		LSSS(LSSSPolicy);
-		//int setPolicy(LSSSPolicy);
 		int setR(SecretType*);
 		int genShares(Share<SecretType>**,size_t*);
 		int reconstructSecret(Share<SecretType>* shares,size_t,SecretType* secret);
@@ -101,6 +99,6 @@ class VLSSS : public LSSS<SecretType>
 		DLType g;
 	public:
 		VLSSS(LSSSPolicy,DLType g);
-		int getVerifiableTokens(DLType**,size_t*);
+		int genVerifiableTokens(DLType**,size_t*);
 		bool verify(DLType*,size_t,Share<SecretType>);
 };

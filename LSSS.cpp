@@ -243,5 +243,26 @@ int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCn
 	return err;
 }
 
+template<>
+int Share<Big>::toString(char* buf,size_t sz)
+{
+	big x;
+	int len,i;
+	char* ptr = buf;
+	miracl *mip=get_mip();
+	
+	x = this->share.getbig();
+	
+	len=cotstr(x,mip->IOBUFF);
+	
+	if(sz < len)
+		return -1;
+	for (i=0;i<len;i++) 
+		*(ptr++)=mip->IOBUFF[i];
+	*(ptr++)='\0';
+	
+	return ptr-buf;
+}
+
 template class LSSS<int>;
 template class LSSS<Big>;

@@ -17,7 +17,6 @@ void showUsageAndExit()
 	exit(0);
 }
 
-
 int main(int argc,const char** argv)
 {
 	if(argc != 3)
@@ -28,7 +27,6 @@ int main(int argc,const char** argv)
 	const char* common=argv[1];
 	const char* label=argv[2];
 	
-	FILE *in;
 	char buf[500],fileName[50];
 	size_t sz;
 	
@@ -50,12 +48,10 @@ int main(int argc,const char** argv)
 	
 	getPath(fileName,label,"ek");
 	sz = inputFromFile(buf,fileName);
-	//cout<<fileName<<" read."<<endl;
-	//cout<<"origin"<<endl<<buf<<"---"<<endl;
+	cout<<fileName<<" read."<<endl;
 	ECn h = ECnFromStr(buf);
 	ECElgamalEncryptKey ek(ecelgamalCurve,h);
 	ek.toString(buf,500);
-	//cout<<"new"<<endl<<buf<<"---"<<endl;
 	
 	BinaryData data = {(byte*)buf,strlen(buf)};
 	if(vk.verify(data,sig))

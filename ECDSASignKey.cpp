@@ -36,13 +36,6 @@ ECDSASignKey::ECDSASignKey(ECDSACurve curve) : curve(curve)
 #endif
 }
 
-ECDSASignKey::ECDSASignKey(Big dA,ECn g,Big n)
-{
-	this->curve.g = g;
-	this->curve.n = n;
-	this->dA = dA;
-}
-
 ECDSASignKey::ECDSASignKey(ECn g,Big n)
 {
 	this->curve.g = g;
@@ -55,6 +48,8 @@ ECDSASignKey::ECDSASignKey(ECn g,Big n)
 	showMsg(dA,"dA=");
 #endif
 }
+
+ECDSASignKey::ECDSASignKey(ECDSACurve curve,Big dA) : curve(curve),dA(dA){}
 
 ECDSAVerifyKey ECDSASignKey::getVerifyKey()
 {	

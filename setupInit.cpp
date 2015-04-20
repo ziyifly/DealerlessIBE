@@ -7,7 +7,6 @@
 #include <iostream>
 using namespace std;
 
-//const char* common = "../lib/miracl/common.ecs";
 const char* usage = "setupInit common label";
 
 Miracl precision = 20;

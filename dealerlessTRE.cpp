@@ -108,6 +108,7 @@ size_t inputFromFile(char* buf,const char* fileName)
 		ptr += strlen(ptr);
 		//cout<<buf<<endl;
 	}
+	fclose(in);
 	return ptr-buf;
 }
 
@@ -118,4 +119,14 @@ ECn ECnFromStr(char* buf)
 	ptr = strtok(NULL,"(,)");
 	Big y(ptr);
 	return ECn(x,y);
+}
+
+void hashBig(sha *s,Big x)
+{
+    int ch;
+    while (x!=0)
+    {
+        ch=x % 256; x /= 256;
+        shs_process(s,ch);
+    }
 }

@@ -14,7 +14,7 @@ template<class SecretType,class DLType>
 VLSSS<SecretType,DLType>::VLSSS(LSSSPolicy policy,DLType g):LSSS<SecretType>(policy),g(g) {}
 
 template<class SecretType,class DLType>
-int VLSSS<SecretType,DLType>::getVerifiableTokens(DLType** tokens,size_t* sz)
+int VLSSS<SecretType,DLType>::genVerifiableTokens(DLType** tokens,size_t* sz)
 {
 	int err = GETTOKBASE;
 	if(!this->secretSet)
@@ -26,8 +26,8 @@ int VLSSS<SecretType,DLType>::getVerifiableTokens(DLType** tokens,size_t* sz)
 		size_t _sz = this->policy.colCnt;
 		DLType* _tokens = new DLType[_sz];
 		
-		cout<<_sz * sizeof(DLType)<<" bytes"<<endl;
-		cout<<"size = "<<_sz<<endl;
+		//cout<<_sz * sizeof(DLType)<<" bytes"<<endl;
+		//cout<<"size = "<<_sz<<endl;
 		for(int i=0;i<_sz;i++)
 		{
 			//cout<<"r[i] = "<<this->r[i]<<endl;
