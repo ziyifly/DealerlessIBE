@@ -1,5 +1,6 @@
 #include "LSSS.h"
 #include "LSSS_err.h"
+#include <sstream>
 
 //#define DEBUG
 #ifdef DEBUG
@@ -32,9 +33,12 @@ int LSSSPolicy::toBinary(byte*,size_t)
 }
 
 template<class SecretType>
-int Share<SecretType>::toString(char*,size_t)
+int Share<SecretType>::toString(char* buf,size_t)
 {
-	return 0;
+	ostringstream out;
+	out<<share;
+	strcpy(buf,out.str().c_str());
+	return strlen(buf);
 }
 
 template<class SecretType>
@@ -266,3 +270,7 @@ int Share<Big>::toString(char* buf,size_t sz)
 
 template class LSSS<int>;
 template class LSSS<Big>;
+//template class LSSS<ECn>;
+
+//template class Share<Big>;
+//template class Share<ECn>;

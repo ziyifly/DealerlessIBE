@@ -71,7 +71,7 @@ int main(int argc,const char** argv)
 	//irand(time(NULL));
 	for(int i=0;i<shareCnt;i++)
 	{
-		getPath(fileName,label,"ek");
+		getPath(fileName,shares[i].label,"ek");
 		sz = inputFromFile(buf,fileName);
 		cout<<fileName<<" read."<<endl;
 		ECn h = ECnFromStr(buf);
@@ -94,6 +94,8 @@ int main(int argc,const char** argv)
 		Big x;
 		char symKeyBuf[20];
 		
+		cout<<"Key = "<<symKey<<endl;
+		
 		shs_init(&sh);
 		symKey.getx(x);
 		hashBig(&sh,x);
@@ -105,17 +107,20 @@ int main(int argc,const char** argv)
 		
 		for(int j=0;j<sz;j++)
 		{
-			char tmp = buf[j];
+			//char tmp = buf[j];
 			aes_encrypt(&a,&buf[j]);
-			//cout<<"Encrypting "<<tmp<<' '<<buf[j]<<endl;
+			//DEBUG..
 		}
 		aes_end(&a);
+		buf[sz] = 0;
 		
 		char shareName[50];
 		strcpy(shareName,shares[i].label);
 		strcat(shareName,".share");
 		getPath(fileName,label,shareName);
 		outputToFile(buf,fileName);
+		
+		//------------------ sign
 	}
 	
 	//----------------------------- tokens
@@ -124,9 +129,10 @@ int main(int argc,const char** argv)
 	for(int i=0;i<tokenCnt;i++)
 	{
 		ptr += tokens[i].toString(ptr,500);
-		cout<<sz<<" bytes token:"<<buf<<endl;
 		*(ptr-1) = '\n';
 	}
+	cout<<"Token="<<endl<<buf<<endl;
+		
 	getPath(fileName,label,"token");
 	outputToFile(buf,fileName);
 	

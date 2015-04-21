@@ -15,6 +15,7 @@ void getPath(char* path,const char* dirName,const char* fileName);
 
 void outputToFile(const char* str,const char* fileName);
 size_t inputFromFile(char* str,const char* fileName);
+size_t inputBinaryFromFile(char* str,const char* fileName);
 
 ECn ECnFromStr(char* buf);
 Big BigFromStr(char* buf);

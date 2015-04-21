@@ -16,7 +16,8 @@ class ECElgamalCiphertext: public Serialization
 	public:
 		int toString(char*,size_t);
 		int toBinary(byte*,size_t);
-		ECElgamalCiphertext(char*,size_t);
+		//ECElgamalCiphertext(char*,size_t);
+		ECElgamalCiphertext(ECn,ECn);
 		
 	friend class ECElgamalEncryptKey;
 	friend class ECElgamalDecryptKey;

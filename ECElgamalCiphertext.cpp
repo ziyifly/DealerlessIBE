@@ -9,8 +9,8 @@ int ECElgamalCiphertext::toString(char* buf,size_t sz)
 	char* ptr = buf;
 	miracl *mip=get_mip();
 	
-	c1.getxy(x1,y1);
-	c2.getxy(x2,y2);
+	c1.get(x1,y1);
+	c2.get(x2,y2);
 	
 	*(ptr++) = '(';
 	n = cotstr(x1.getbig(),mip->IOBUFF);
@@ -50,6 +50,6 @@ int ECElgamalCiphertext::toBinary(byte* buf,size_t sz)
 }
 
 // Constructor
-ECElgamalCiphertext::ECElgamalCiphertext(char*,size_t)
-{}
+//ECElgamalCiphertext::ECElgamalCiphertext(char*,size_t){}
 ECElgamalCiphertext::ECElgamalCiphertext(){}
+ECElgamalCiphertext::ECElgamalCiphertext(ECn c1,ECn c2):c1(c1),c2(c2){}

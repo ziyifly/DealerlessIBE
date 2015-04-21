@@ -112,13 +112,28 @@ size_t inputFromFile(char* buf,const char* fileName)
 	return ptr-buf;
 }
 
+size_t inputBinaryFromFile(char* buf,const char* fileName)
+{
+	FILE *in = fopen(fileName,"rb");
+	
+	fseek (in , 0 , SEEK_END);
+	size_t lSize = ftell (in);
+	rewind (in);
+	
+	fread(buf,1,lSize,in);
+	fclose(in);
+	
+	return lSize;
+}
+
 ECn ECnFromStr(char* buf)
 {
-	char* ptr = strtok(buf,"(,)");
+	char* ptr = strtok(buf,"(,)\n");
 	Big x(ptr);
-	ptr = strtok(NULL,"(,)");
+	ptr = strtok(NULL,"(,)\n");
 	Big y(ptr);
-	return ECn(x,y);
+	ECn p(x,y);
+	return p;
 }
 
 void hashBig(sha *s,Big x)
