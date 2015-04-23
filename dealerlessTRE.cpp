@@ -36,7 +36,6 @@ int loadCurve(const char* curveFile,ECn &G,Big &q,miracl* precision)
 	
 	return 0;
 }
-
 ECDSACurve loadECDSACurve(const char* curveFile,miracl* precision)
 {
 	ECn G;
@@ -45,7 +44,6 @@ ECDSACurve loadECDSACurve(const char* curveFile,miracl* precision)
 	ECDSACurve curve = {G,q};
 	return curve;
 }
-
 ECElgamalCurve loadECElgamalCurve(const char* curveFile,miracl* precision)
 {
 	ECn G;
@@ -76,7 +74,6 @@ LSSSPolicy loadPolicy(const char* policyFile)
 	}
 	return policy;
 }
-
 void clearPolicy(LSSSPolicy policy)
 {
 	for(int i=0;i<policy.rowCnt;i++)
@@ -88,15 +85,15 @@ void clearPolicy(LSSSPolicy policy)
 	free(policy.labels);
 }
 
+void getFileName(char* fileName,const char* name,const char* ext)
+{
+	strcpy(fileName,name);
+	strcat(fileName,".");
+	strcat(fileName,ext);
+}
 void getPath(char* path,const char* dirName,const char* fileName)
 {
 	sprintf(path,"%s/%s",dirName,fileName);
-}
-
-void outputToFile(const char* str,const char* fileName)
-{
-	ofstream out(fileName);
-	out<<str<<endl;
 }
 
 size_t inputFromFile(char* buf,const char* fileName)
@@ -111,8 +108,13 @@ size_t inputFromFile(char* buf,const char* fileName)
 	fclose(in);
 	return ptr-buf;
 }
+void outputToFile(const char* str,const char* fileName)
+{
+	ofstream out(fileName);
+	out<<str<<endl;
+}
 
-size_t inputBinaryFromFile(char* buf,const char* fileName)
+size_t inputBinaryFromFile(BinaryData* buf,const char* fileName)
 {
 	FILE *in = fopen(fileName,"rb");
 	
@@ -120,10 +122,18 @@ size_t inputBinaryFromFile(char* buf,const char* fileName)
 	size_t lSize = ftell (in);
 	rewind (in);
 	
-	fread(buf,1,lSize,in);
+	fread(buf->data,1,lSize,in);
+	buf->sz = lSize;
 	fclose(in);
 	
 	return lSize;
+}
+void outputBinaryToFile(BinaryData buf,const char* fileName)
+{
+	FILE *out = fopen(fileName,"wb");
+	
+	fwrite(buf.data,1,buf.sz,out);
+	fclose(out);
 }
 
 ECn ECnFromStr(char* buf)

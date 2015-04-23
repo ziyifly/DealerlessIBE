@@ -25,8 +25,9 @@ int main(int argc,const char** argv)
 	}
 	
 	const char* common=argv[1];
-	//const char* policyFile=argv[2];
 	const char* label=argv[2];
+	
+	irand(time(NULL));
 	
 	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
 	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
@@ -38,40 +39,46 @@ int main(int argc,const char** argv)
 	ECElgamalEncryptKey ek = dk.getEncrpytKey();
 	
 	FILE *out;
-	char buf[500],fileName[50];
+	char buf[500],filePath[100],fileName[50];
 	mkdir(label, 0755);
 	cout<<label<<" dir created."<<endl;
 	
-	getPath(fileName,label,"ek");
-	cout<<fileName<<" created."<<endl;
+	mkdir("public", 0755);
+	cout<<"public dir created."<<endl;
+	
+	getFileName(fileName,label,"ek");
+	getPath(filePath,"public",fileName);
+	cout<<filePath<<" created."<<endl;
 	ek.toString(buf,500);
-	outputToFile(buf,fileName);
+	outputToFile(buf,filePath);
 	cout<<buf<<endl;
 	
-	getPath(fileName,label,"sig");
-	cout<<fileName<<" created."<<endl;
+	getFileName(fileName,label,"ekSig");
+	getPath(filePath,"public",fileName);
+	cout<<filePath<<" created."<<endl;
 	BinaryData data = {(byte*)buf,strlen(buf)};
 	ECDSASignature sig = sk.sign(data);
 	sig.toString(buf,500);
-	outputToFile(buf,fileName);
+	outputToFile(buf,filePath);
 	cout<<buf<<endl;
 	
-	getPath(fileName,label,"dk");
-	cout<<fileName<<" created."<<endl;
+	getPath(filePath,label,"dk");
+	cout<<filePath<<" created."<<endl;
 	dk.toString(buf,500);
-	outputToFile(buf,fileName);
+	outputToFile(buf,filePath);
 	cout<<buf<<endl;
 	
-	getPath(fileName,label,"sk");
-	cout<<fileName<<" created."<<endl;
+	getPath(filePath,label,"sk");
+	cout<<filePath<<" created."<<endl;
 	sk.toString(buf,500);
-	outputToFile(buf,fileName);
+	outputToFile(buf,filePath);
 	cout<<buf<<endl;
 	
-	getPath(fileName,label,"vk");
-	cout<<fileName<<" created."<<endl;
+	getFileName(fileName,label,"vk");
+	getPath(filePath,"public",fileName);
+	cout<<filePath<<" created."<<endl;
 	vk.toString(buf,500);
-	outputToFile(buf,fileName);
+	outputToFile(buf,filePath);
 	cout<<buf<<endl;
 	
 	//clearPolicy(policy);

@@ -32,8 +32,10 @@ int main(int argc,const char** argv)
 	const char* policyFileName=argv[2];
 	const char* label=argv[3];
 
-	char buf[500],fileName[50];
+	char buf[500],filePath[100],fileName[50];
 	size_t sz;
+	
+	irand(time(NULL));
 	
 	cout<<"Loading curves..."<<endl;
 	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
@@ -43,8 +45,8 @@ int main(int argc,const char** argv)
 	LSSSPolicy policy = loadPolicy(policyFileName);
 	
 	cout<<"Loading sign key..."<<endl;	
-	getPath(fileName,label,"sk");
-	sz = inputFromFile(buf,fileName);
+	getPath(filePath,label,"sk");
+	sz = inputFromFile(buf,filePath);
 	Big dA(buf);
 	ECDSASignKey sk(ecdsaCurve,dA);
 	
@@ -68,12 +70,17 @@ int main(int argc,const char** argv)
 	
 	//----------------------------- shares
 	cout<<"Encrypting shares..."<<endl;
-	//irand(time(NULL));
 	for(int i=0;i<shareCnt;i++)
 	{
-		getPath(fileName,shares[i].label,"ek");
-		sz = inputFromFile(buf,fileName);
-		cout<<fileName<<" read."<<endl;
+		char _fileName[100];
+		strcpy(_fileName,label);
+		strcat(_fileName,".");
+		strcat(_fileName,shares[i].label);
+		
+		getFileName(fileName,shares[i].label,"ek");
+		getPath(filePath,"public",fileName);
+		cout<<"Loading "<<filePath<<"..."<<endl;
+		sz = inputFromFile(buf,filePath);
 		ECn h = ECnFromStr(buf);
 		ECElgamalEncryptKey ek(ecelgamalCurve,h);
 		
@@ -82,19 +89,19 @@ int main(int argc,const char** argv)
 		
 		ECElgamalCiphertext ct = ek.encrypt(symKey);
 		
+		getFileName(fileName,_fileName,"ct");
+		getPath(filePath,"public",fileName);
+		cout<<"Ct generate "<<filePath<<"..."<<endl;
+		
 		ct.toString(buf,500);
-		char shareKey[50];
-		strcpy(shareKey,shares[i].label);
-		strcat(shareKey,".ct");
-		getPath(fileName,label,shareKey);
-		outputToFile(buf,fileName);
+		outputToFile(buf,filePath);
 		
 		aes a;
 		sha sh;
 		Big x;
 		char symKeyBuf[20];
 		
-		cout<<"Key = "<<symKey<<endl;
+		cout<<"Sym. Key = "<<symKey<<endl;
 		
 		shs_init(&sh);
 		symKey.getx(x);
@@ -112,15 +119,22 @@ int main(int argc,const char** argv)
 			//DEBUG..
 		}
 		aes_end(&a);
-		buf[sz] = 0;
 		
-		char shareName[50];
-		strcpy(shareName,shares[i].label);
-		strcat(shareName,".share");
-		getPath(fileName,label,shareName);
-		outputToFile(buf,fileName);
+		getFileName(fileName,_fileName,"share");
+		getPath(filePath,"public",fileName);
 		
-		//------------------ sign
+		BinaryData data = {(byte*)buf,sz};
+		outputBinaryToFile(data,filePath);
+		
+		cout<<"Signing share ..."<<endl;
+		ECDSASignature sig = sk.sign(data);
+		sig.toString(buf,500);
+		
+		getFileName(fileName,_fileName,"shareSig");
+		getPath(filePath,"public",fileName);
+		
+		outputToFile(buf,filePath);
+		cout<<buf<<endl;
 	}
 	
 	//----------------------------- tokens
@@ -131,10 +145,12 @@ int main(int argc,const char** argv)
 		ptr += tokens[i].toString(ptr,500);
 		*(ptr-1) = '\n';
 	}
+	*(ptr-1) = 0;
 	cout<<"Token="<<endl<<buf<<endl;
 		
-	getPath(fileName,label,"token");
-	outputToFile(buf,fileName);
+	getFileName(fileName,label,"token");
+	getPath(filePath,"public",fileName);
+	outputToFile(buf,filePath);
 	
 	//-----------------------------
 	

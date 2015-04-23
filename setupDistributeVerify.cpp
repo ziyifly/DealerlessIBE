@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 
-const char* usage = "setupDistributeVerify common policyFile sndLabel recvLabel";
+const char* usage = "setupDistributeVerify common policyFile sndLabel rcvLabel";
 char iv[16] = {0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
 
 Miracl precision = 20;
@@ -31,9 +31,9 @@ int main(int argc,const char** argv)
 	const char* common=argv[1];
 	const char* policyFileName=argv[2];
 	const char* sndLabel=argv[3];
-	const char* recvLabel=argv[4];
+	const char* rcvLabel=argv[4];
 	
-	char buf[500],filePath[100],fileName[50],*ptr;
+	char buf[500],filePath[100],_fileName[100],fileName[50],*ptr;
 	size_t sz;
 	
 	cout<<"Loading curves..."<<endl;
@@ -44,21 +44,24 @@ int main(int argc,const char** argv)
 	LSSSPolicy policy = loadPolicy(policyFileName);
 	
 	cout<<"Loading vk..."<<endl;
-	getPath(filePath,sndLabel,"vk");
+	getFileName(fileName,sndLabel,"vk");
+	getPath(filePath,"public",fileName);
 	sz = inputFromFile(buf,filePath);
 	ECn qA = ECnFromStr(buf);
 	ECDSAVerifyKey vk(ecdsaCurve,qA);
 	
 	cout<<"Loading dk..."<<endl;
-	getPath(filePath,recvLabel,"dk");
+	getPath(filePath,rcvLabel,"dk");
 	sz = inputFromFile(buf,filePath);
 	Big x(buf);
 	ECElgamalDecryptKey dk(ecelgamalCurve,x);
 	
 	cout<<"Loading ct..."<<endl;
-	strcpy(fileName,recvLabel);
-	strcat(fileName,".ct");
-	getPath(filePath,sndLabel,fileName);
+	strcpy(_fileName,sndLabel);
+	strcat(_fileName,".");
+	strcat(_fileName,rcvLabel);
+	getFileName(fileName,_fileName,"ct");
+	getPath(filePath,"public",fileName);
 	sz = inputFromFile(buf,filePath);
 	
 	ECn c1 = ECnFromStr(buf);
@@ -66,8 +69,9 @@ int main(int argc,const char** argv)
 	ECElgamalCiphertext ct(c1,c2);
 	cout<<"---"<<c1<<' '<<c2<<endl;
 	
-	cout<<"Loading tokens..."<<endl;
-	getPath(filePath,sndLabel,"token");
+	getFileName(fileName,sndLabel,"token");
+	getPath(filePath,"public",fileName);
+	cout<<"Loading tokens("<<filePath<<")..."<<endl;
 	sz = inputFromFile(buf,filePath);
 	ECGroup *tokens = new ECGroup[policy.colCnt];
 	for(int i=0;i<policy.colCnt;i++)
@@ -78,10 +82,11 @@ int main(int argc,const char** argv)
 	}
 	
 	cout<<"Loading encrypted share..."<<endl;
-	strcpy(fileName,recvLabel);
-	strcat(fileName,".share");
-	getPath(filePath,sndLabel,fileName);
-	sz = inputBinaryFromFile(buf,filePath);
+	
+	getFileName(fileName,_fileName,"share");
+	getPath(filePath,"public",fileName);
+	BinaryData data = {(byte*)buf,sz};
+	sz = inputBinaryFromFile(&data,filePath);
 	
 	cout<<"Decrypting share..."<<endl;
 	ECn symKey = dk.decrypt(ct);
@@ -106,16 +111,17 @@ int main(int argc,const char** argv)
 	}
 	aes_end(&a);
 	buf[sz] = 0;
+	cout<<sz<<" bytes shares:"<<buf<<endl;
 	
 	cout<<"Share Initial..."<<endl;
 	Share<Big> share;
-	share.label = new char[strlen(recvLabel)];
-	strcpy(share.label,recvLabel);
+	share.label = new char[strlen(rcvLabel)+1];
+	strcpy(share.label,rcvLabel);
 	Big _share(buf);
 	share.share = _share;
 	
-	sz = share.toString(buf,500);
-	cout<<sz<<" bytes shares:"<<buf<<endl;
+	//sz = share.toString(buf,500);
+	//cout<<sz<<" bytes shares:"<<buf<<endl;
 	
 	cout<<"Verify share..."<<endl;
 	VLSSS<Big,ECGroup> vlsss(policy,ecdsaCurve.g); //ABECurve
@@ -132,7 +138,7 @@ int main(int argc,const char** argv)
 	cout<<"Save share..."<<endl;
 	strcpy(fileName,sndLabel);
 	strcat(fileName,".shareRcv");
-	getPath(filePath,recvLabel,fileName);
+	getPath(filePath,rcvLabel,fileName);
 	sz = share.toString(buf,500);
 	//cout<<"---"<<buf<<endl;
 	outputToFile(buf,filePath);

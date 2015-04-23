@@ -27,33 +27,38 @@ int main(int argc,const char** argv)
 	const char* common=argv[1];
 	const char* label=argv[2];
 	
-	char buf[500],fileName[50];
+	char buf[500],filePath[100],fileName[50];
 	size_t sz;
 	
+	cout<<"Loading curves..."<<endl;
 	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
 	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
 	
-	getPath(fileName,label,"sig");
-	sz = inputFromFile(buf,fileName);
-	cout<<fileName<<" read."<<endl;
+	getFileName(fileName,label,"ekSig");
+	getPath(filePath,"public",fileName);
+	cout<<"Loading "<<filePath<<" ..."<<endl;
+	sz = inputFromFile(buf,filePath);
 	cout<<buf;
 	ECDSASignature sig(buf,sz);
 	
-	getPath(fileName,label,"vk");
-	sz = inputFromFile(buf,fileName);
-	cout<<fileName<<" read."<<endl;
+	getFileName(fileName,label,"vk");
+	getPath(filePath,"public",fileName);
+	cout<<"Loading "<<filePath<<" ..."<<endl;
+	sz = inputFromFile(buf,filePath);
 	cout<<buf;
 	ECn qA = ECnFromStr(buf);
 	ECDSAVerifyKey vk(ecdsaCurve,qA);
 	
-	getPath(fileName,label,"ek");
-	sz = inputFromFile(buf,fileName);
-	cout<<fileName<<" read."<<endl;
+	getFileName(fileName,label,"ek");
+	getPath(filePath,"public",fileName);
+	sz = inputFromFile(buf,filePath);
+	cout<<"Loading "<<filePath<<" ..."<<endl;
+	cout<<sz<<" bytes:"<<buf<<endl;
 	ECn h = ECnFromStr(buf);
 	ECElgamalEncryptKey ek(ecelgamalCurve,h);
-	ek.toString(buf,500);
-	
+	sz = ek.toString(buf,500);
 	BinaryData data = {(byte*)buf,strlen(buf)};
+	
 	if(vk.verify(data,sig))
 	{
 		cout<<"Verify Success!!"<<endl;
