@@ -1,5 +1,4 @@
 #include "LSSS.h"
-#include "LSSS_err.h"
 #include <sstream>
 
 //#define DEBUG
@@ -48,17 +47,20 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 	originMatrix = (int**)calloc(shareCnt,sizeof(int*));
 	for(i=0;i<shareCnt;i++)
 	{
+		originMatrix[i] = (int*)calloc(policy.colCnt,sizeof(int));
 		for(j=0;j<policy.rowCnt;j++)
 		{
 			if(strcmp(shareLabels[i],policy.labels[j])==0)
 			{
-				originMatrix[i] = (int*)calloc(policy.colCnt,sizeof(int));
 				memcpy(originMatrix[i],policy.A[j],policy.colCnt*sizeof(int));
 				break;
 			}
 		}
 		if(j==policy.rowCnt)
-			err = RECONSTRLABEL;
+		{
+			//err = RECONSTRLABEL;
+			memset(originMatrix[i],0,policy.colCnt*sizeof(int));
+		}
 	}
 	
 	// GJ elimination
@@ -165,6 +167,8 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 	return err;
 }
 
+// LSSSPolicy
+
 int LSSSPolicy::toString(char*,size_t)
 {
 	return 0;
@@ -174,6 +178,8 @@ int LSSSPolicy::toBinary(byte*,size_t)
 {
 	return 0;
 }
+
+// Share
 
 template<class SecretType>
 int Share<SecretType>::toString(char* buf,size_t)
@@ -190,8 +196,33 @@ int Share<SecretType>::toBinary(byte*,size_t)
 	return 0;
 }
 
+template<>
+int Share<Big>::toString(char* buf,size_t sz)
+{
+	big x;
+	int len,i;
+	char* ptr = buf;
+	miracl *mip=get_mip();
+	
+	x = this->share.getbig();
+	
+	len=cotstr(x,mip->IOBUFF);
+	
+	if(sz < len)
+		return -1;
+	for (i=0;i<len;i++) 
+		*(ptr++)=mip->IOBUFF[i];
+	*(ptr++)='\0';
+	
+	return ptr-buf;
+}
+
+// LSSS
+
 template<class SecretType>
 LSSS<SecretType>::LSSS(LSSSPolicy policy) : policy(policy), secretSet(false){}
+
+//LSSS<GT>::LSSS(LSSSPolicy policy,PFC pfc) : policy(policy), secretSet(false),pfc(pfc){}
 
 template<class SecretType>
 int LSSS<SecretType>::setR(SecretType* r)
@@ -261,29 +292,12 @@ int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCn
 	return err;
 }
 
-template<>
-int Share<Big>::toString(char* buf,size_t sz)
-{
-	big x;
-	int len,i;
-	char* ptr = buf;
-	miracl *mip=get_mip();
-	
-	x = this->share.getbig();
-	
-	len=cotstr(x,mip->IOBUFF);
-	
-	if(sz < len)
-		return -1;
-	for (i=0;i<len;i++) 
-		*(ptr++)=mip->IOBUFF[i];
-	*(ptr++)='\0';
-	
-	return ptr-buf;
-}
+// Template class definition
 
 template class LSSS<int>;
 template class LSSS<Big>;
+
+//template class LSSS<GT>;
 //template class LSSS<ECn>;
 
 //template class Share<Big>;

@@ -1,3 +1,7 @@
+#ifndef LSSS_H
+#define LSSS_H
+
+#include "LSSS_err.h"
 #include "Crypto119.h"
 #include "big.h"
 #include "ecn.h"
@@ -92,6 +96,23 @@ class LSSS
 		int reconstructSecret(Share<SecretType>* shares,size_t,SecretType* secret);
 };
 
+/*
+template<>
+class LSSS<GT>
+{
+	private:
+		bool secretSet;
+		LSSSPolicy policy;
+		PFC pfc;
+		GT* r;
+	public:
+		LSSS(LSSSPolicy,PFC);
+		int setR(GT*);
+		int genShares(Share<GT>**,size_t*);
+		int reconstructSecret(Share<GT>*,size_t,GT* secret);
+};
+*/
+
 template<class SecretType,class DLType>
 class VLSSS : public LSSS<SecretType>
 {
@@ -102,3 +123,7 @@ class VLSSS : public LSSS<SecretType>
 		int genVerifiableTokens(DLType**,size_t*);
 		bool verify(DLType*,size_t,Share<SecretType>);
 };
+
+int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t);
+
+#endif

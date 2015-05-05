@@ -92,7 +92,7 @@ int main()
 	
 	ECGroup* tokens;
 	size_t tokenCnt;
-	err = vlsss.getVerifiableTokens(&tokens,&tokenCnt);
+	err = vlsss.genVerifiableTokens(&tokens,&tokenCnt);
 	
 	cout<<tokenCnt<<" Tokens Gen. err = "<<err<<endl;
 	//cout<<tokens<<endl;

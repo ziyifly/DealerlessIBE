@@ -1,4 +1,8 @@
+#ifndef Crypto119_H
+#define Crypto119_H
+
 #include <cstdlib>
+
 
 typedef unsigned char byte;
 
@@ -45,8 +49,4 @@ class DecryptKey: public Serialization
 		virtual EncryptKeyType getEncrpytKey() = 0;
 };
 
-template<class idType,class IBESecretKeyType>
-class IBEMasterKey: public Serialization
-{
-	virtual int genSecretKey(idType);
-};
+#endif

@@ -1,5 +1,7 @@
 #include "LSSS.h"
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 int main()
 {
@@ -50,11 +52,14 @@ int main()
 	
 	printf("----- Reconstruct -----\n");
 	
-	Share<int> reShares[3] = {shares[0],shares[3],shares[1]};
-	int reSrt;
-	int err = lsss.reconstructSecret(reShares,3,&reSrt);
+	Share<int> reShares[5] = {shares[0],shares[3],shares[1]};
+	reShares[3].label = "aaaaa";
+	reShares[4].label = "bbbbb";
 	
-	for(int i=0;i<3;i++)
+	int reSrt;
+	int err = lsss.reconstructSecret(reShares,5,&reSrt);
+	
+	for(int i=0;i<5;i++)
 	{
 		printf("%s : %d\n",reShares[i].label,reShares[i].share);
 	}
