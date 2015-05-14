@@ -5,61 +5,11 @@
 #include "Crypto119.h"
 #include "big.h"
 #include "ecn.h"
+
+#include "DLog.h"
+
 #include <cstring>
 #include <cstdlib>
-
-struct IntGroup: public Serialization
-{
-	unsigned int num,n;
-	IntGroup(unsigned int num,unsigned int n): num(num),n(n) {};
-	IntGroup() {};
-	
-	IntGroup& operator*=(IntGroup);
-	
-	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
-	
-	friend IntGroup operator*(IntGroup,IntGroup);
-	friend IntGroup _pow(IntGroup,int);
-	friend bool operator==(IntGroup,IntGroup);
-};
-
-struct BigGroup: public Serialization
-{
-	Big num,n;
-	
-	BigGroup(Big num,Big n): num(num),n(n) {};
-	BigGroup() {};
-	
-	BigGroup& operator*=(BigGroup);
-	
-	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
-	
-	friend BigGroup operator*(BigGroup,BigGroup);
-	friend BigGroup _pow(BigGroup,int);
-	friend BigGroup _pow(BigGroup,Big);
-	friend bool operator==(BigGroup,BigGroup);
-};
-
-struct ECGroup: public Serialization
-{
-	ECn p;
-	
-	ECGroup(ECn p): p(p) {};
-	ECGroup() {};
-	
-	ECGroup& operator*=(ECGroup);
-	//ECGroup& operator=(ECGroup a) {p=a.p;}
-	
-	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
-	
-	friend ECGroup operator*(ECGroup,ECGroup);
-	friend ECGroup _pow(ECGroup,int);
-	friend ECGroup _pow(ECGroup,Big);
-	friend bool operator==(ECGroup,ECGroup);
-};
 
 struct LSSSPolicy: public Serialization
 {
@@ -95,23 +45,6 @@ class LSSS
 		int genShares(Share<SecretType>**,size_t*);
 		int reconstructSecret(Share<SecretType>* shares,size_t,SecretType* secret);
 };
-
-/*
-template<>
-class LSSS<GT>
-{
-	private:
-		bool secretSet;
-		LSSSPolicy policy;
-		PFC pfc;
-		GT* r;
-	public:
-		LSSS(LSSSPolicy,PFC);
-		int setR(GT*);
-		int genShares(Share<GT>**,size_t*);
-		int reconstructSecret(Share<GT>*,size_t,GT* secret);
-};
-*/
 
 template<class SecretType,class DLType>
 class VLSSS : public LSSS<SecretType>

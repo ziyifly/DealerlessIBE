@@ -5,12 +5,16 @@
 #include "dealerlessTRE.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 const char* usage = "setupDistributeVerify common policyFile sndLabel rcvLabel";
+const char* ecdecrypt = "./bin/ecdecrypt";
+
 char iv[16] = {0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
 
-Miracl precision = 20;
+//Miracl precision = 20;
 
 void showUsageAndExit()
 {
@@ -20,112 +24,123 @@ void showUsageAndExit()
 
 int main(int argc,const char** argv)
 {
+	PFC pfc(AES_SECURITY);  // initialise PFC
+	miracl* mip=get_mip();
+	
 	if(argc != 5)
 	{
 		showUsageAndExit();
 	}
-	else
-	{
-		cout<<"Initial.."<<endl;
-	}
+	
 	const char* common=argv[1];
 	const char* policyFileName=argv[2];
 	const char* sndLabel=argv[3];
 	const char* rcvLabel=argv[4];
 	
-	char buf[500],filePath[100],_fileName[100],fileName[50],*ptr;
+	char buf[1500],filePath[100],_fileName[100],fileName[50],*ptr;
 	size_t sz;
 	
-	cout<<"Loading curves..."<<endl;
-	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
-	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
-	
-	cout<<"Loading policy..."<<endl;
-	LSSSPolicy policy = loadPolicy(policyFileName);
-	
-	cout<<"Loading vk..."<<endl;
-	getFileName(fileName,sndLabel,"vk");
-	getPath(filePath,"public",fileName);
-	sz = inputFromFile(buf,filePath);
-	ECn qA = ECnFromStr(buf);
-	ECDSAVerifyKey vk(ecdsaCurve,qA);
-	
-	cout<<"Loading dk..."<<endl;
-	getPath(filePath,rcvLabel,"dk");
-	sz = inputFromFile(buf,filePath);
-	Big x(buf);
-	ECElgamalDecryptKey dk(ecelgamalCurve,x);
-	
-	cout<<"Loading ct..."<<endl;
+	char dkFile[50],ctFile[50];
 	strcpy(_fileName,sndLabel);
 	strcat(_fileName,".");
 	strcat(_fileName,rcvLabel);
 	getFileName(fileName,_fileName,"ct");
-	getPath(filePath,"public",fileName);
-	sz = inputFromFile(buf,filePath);
+	getPath(ctFile,"public",fileName);
+	getPath(dkFile,rcvLabel,"dk");
 	
-	ECn c1 = ECnFromStr(buf);
-	ECn c2 = ECnFromStr(NULL);
-	ECElgamalCiphertext ct(c1,c2);
-	cout<<"---"<<c1<<' '<<c2<<endl;
+	cout<<"Loading policy..."<<endl;
+	LSSSPolicy policy = loadPolicy(policyFileName);
 	
-	getFileName(fileName,sndLabel,"token");
-	getPath(filePath,"public",fileName);
-	cout<<"Loading tokens("<<filePath<<")..."<<endl;
-	sz = inputFromFile(buf,filePath);
-	ECGroup *tokens = new ECGroup[policy.colCnt];
-	for(int i=0;i<policy.colCnt;i++)
-	{
-		ECn p = ECnFromStr(i==0?buf:NULL);
-		new(&tokens[i]) ECGroup(p);
-		cout<<"---"<<tokens[i].p<<endl;
-	}
+	ostringstream cmd;
+	cmd<<ecdecrypt<<' '<<common<<' '<<dkFile<<' '<<ctFile<<" tmp";
+	cout<<"Decrypt key.."<<endl;
+	cout<<cmd.str().c_str()<<endl;
+	system(cmd.str().c_str());
+	cout<<"Decrypt finish"<<endl;
+	sz = inputFromFile(buf,"tmp");
+	Big x(buf);
+	cout<<"Decrypted Key = "<<x<<endl;
+	char symKeyBuf[20];
+	hashBig(x,symKeyBuf);
 	
-	cout<<"Loading encrypted share..."<<endl;
+	cout<<"Loading g1..."<<endl;
+	getPath(filePath,"public","g1");
+	G1 g1 = G1FromFile(filePath);
+	//cout<<"g1 = "<<g1.g<<endl;
 	
-	getFileName(fileName,_fileName,"share");
+	cout<<"Loading g2..."<<endl;
+	getPath(filePath,"public","g2");
+	G2 g2 = G2FromFile(filePath);
+	//cout<<"g2 = "<<g2.g<<endl;
+	
+	GT egg = pfc.pairing(g2,g1);
+	
+	cout<<"Loading encrypted a..."<<endl;
+	getFileName(fileName,_fileName,"a_ct");
 	getPath(filePath,"public",fileName);
 	BinaryData data = {(byte*)buf,sz};
-	sz = inputBinaryFromFile(&data,filePath);
-	
-	cout<<"Decrypting share..."<<endl;
-	ECn symKey = dk.decrypt(ct);
-	
-	cout<<"Key = "<<symKey<<endl;
-	aes a;
-	sha sh;
-	char symKeyBuf[20];
-	
-	shs_init(&sh);
-	symKey.getx(x);
-	hashBig(&sh,x);
-	shs_hash(&sh,symKeyBuf);
-	
-	aes_init(&a,MR_PCFB1,16,symKeyBuf,iv);
-	
-	for(int j=0;j<sz;j++)
-	{
-		//char tmp = buf[j];
-		aes_decrypt(&a,&buf[j]);
-		//DEBUG..
-	}
-	aes_end(&a);
-	buf[sz] = 0;
-	cout<<sz<<" bytes shares:"<<buf<<endl;
-	
+	data.sz = inputBinaryFromFile(&data,filePath);
+	aesDecrypt(symKeyBuf,buf,data.sz,iv);
 	cout<<"Share Initial..."<<endl;
-	Share<Big> share;
-	share.label = new char[strlen(rcvLabel)+1];
-	strcpy(share.label,rcvLabel);
-	Big _share(buf);
-	share.share = _share;
+	Share<Big> share_a;
+	share_a.label = new char[strlen(rcvLabel)+1];
+	strcpy(share_a.label,rcvLabel);
+	Big _share_a(buf);
+	share_a.share = _share_a;
+	cout<<"a = "<<share_a.share<<endl;
 	
-	//sz = share.toString(buf,500);
-	//cout<<sz<<" bytes shares:"<<buf<<endl;
+	cout<<"Loading encrypted alpha..."<<endl;
+	getFileName(fileName,_fileName,"alpha_ct");
+	getPath(filePath,"public",fileName);
+	data.data = (byte*)buf;
+	data.sz = inputBinaryFromFile(&data,filePath);
+	aesDecrypt(symKeyBuf,buf,data.sz,iv);
+	cout<<"Share Initial..."<<endl;
+	Share<Big> share_alpha;
+	share_alpha.label = new char[strlen(rcvLabel)+1];
+	strcpy(share_alpha.label,rcvLabel);
+	Big _share_alpha(buf);
+	share_alpha.share = _share_alpha;
+	cout<<"alpha = "<<share_alpha.share<<endl;
+	
+	cout<<"Loading tokens g1a..."<<endl;
+	getFileName(fileName,sndLabel,"g1a");
+	getPath(filePath,"public",fileName);
+	G1Group *tokens_g1_a = new G1Group[policy.colCnt];
+	for(int i=0;i<policy.colCnt;i++)
+	{
+		ostringstream filePathBuf;
+		filePathBuf << filePath << i;
+		tokens_g1_a[i].g = G1FromFile(filePathBuf.str().c_str());
+		cout<<tokens_g1_a[i].g.g<<endl;
+	}
+	
+	cout<<"Loading tokens eggalpha..."<<endl;
+	getFileName(fileName,sndLabel,"eggalpha");
+	getPath(filePath,"public",fileName);
+	GTGroup *tokens_eggalpha = new GTGroup[policy.colCnt];
+	for(int i=0;i<policy.colCnt;i++)
+	{
+		ostringstream filePathBuf;
+		filePathBuf << filePath << i;
+		tokens_eggalpha[i].g = GTFromFile(filePathBuf.str().c_str());
+		cout<<tokens_eggalpha[i].g.g<<endl;
+	}
 	
 	cout<<"Verify share..."<<endl;
-	VLSSS<Big,ECGroup> vlsss(policy,ecdsaCurve.g); //ABECurve
-	if(vlsss.verify(tokens,policy.colCnt,share))
+	DLogSetPFC(&pfc);
+	VLSSS<Big,G1Group> vlsss_g1_a(policy,g1);
+	if(vlsss_g1_a.verify(tokens_g1_a,policy.colCnt,share_a))
+	{
+		cout<<"Verify Success!!!"<<endl;
+	}
+	else
+	{
+		cout<<"Verify fail!!!"<<endl;
+		return 0;
+	}
+	VLSSS<Big,GTGroup> vlsss_eggalpha(policy,egg);
+	if(vlsss_eggalpha.verify(tokens_eggalpha,policy.colCnt,share_alpha))
 	{
 		cout<<"Verify Success!!!"<<endl;
 	}
@@ -135,16 +150,23 @@ int main(int argc,const char** argv)
 		return 0;
 	}
 	
-	cout<<"Save share..."<<endl;
+	cout<<"Save a..."<<endl;
 	strcpy(fileName,sndLabel);
-	strcat(fileName,".shareRcv");
+	strcat(fileName,".aRcv");
 	getPath(filePath,rcvLabel,fileName);
-	sz = share.toString(buf,500);
-	//cout<<"---"<<buf<<endl;
-	outputToFile(buf,filePath);
+	ofstream out(filePath);
+	out<<share_a.share<<endl;
+	
+	cout<<"Save alpha..."<<endl;
+	strcpy(fileName,sndLabel);
+	strcat(fileName,".alphaRcv");
+	getPath(filePath,rcvLabel,fileName);
+	ofstream out2(filePath);
+	out2<<share_alpha.share<<endl;
 	
 	clearPolicy(policy);
-	delete share.label;
+	delete share_a.label;
+	delete share_alpha.label;
 	
 	cout<<"End"<<endl;
 	

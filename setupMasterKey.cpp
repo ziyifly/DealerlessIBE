@@ -1,17 +1,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <cstdlib>
-#include <iostream>
-#include <sstream>
 
 #include "dealerlessTRE.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
-const char* usage = "setupPubKey common policyFile label";
-
-Miracl precision = 20;
+const char* usage = "setupPubKey policyFile label";
 
 void showUsageAndExit()
 {
@@ -21,45 +19,63 @@ void showUsageAndExit()
 
 int main(int argc,const char** argv)
 {
-	if(argc != 4)
+	PFC pfc(AES_SECURITY);  // initialise PFC
+	miracl* mip=get_mip();
+	
+	if(argc != 3)
 	{
 		showUsageAndExit();
 	}
-	else
-	{
-		cout<<"Initial.."<<endl;
-	}
-	const char* common=argv[1];
-	const char* policyFileName=argv[2];
-	const char* label=argv[3];
+	
+	const char* policyFileName=argv[1];
+	const char* label=argv[2];
 	
 	char buf[500],filePath[100],fileName[50],*ptr;
 	size_t sz;
 	
-	cout<<"Loading curves..."<<endl;
-	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
-	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
-	
 	cout<<"Loading policy..."<<endl;
 	LSSSPolicy policy = loadPolicy(policyFileName);
 	
-	Big mk(0);
+	cout<<"Loading g1..."<<endl;
+	getPath(filePath,"public","g1");
+	G1 g1 = G1FromFile(filePath);
+	
+	Big alpha(0),a(0);
 	for(int i=0;i<policy.rowCnt;i++)
 	{
 		strcpy(fileName,policy.labels[i]);
-		strcat(fileName,".shareRcv");
+		strcat(fileName,".alphaRcv");
 		getPath(filePath,label,fileName);
 		cout<<"Loading "<<filePath<<" ..."<<endl;
 		sz = inputFromFile(buf,filePath);
 		Big tmp(buf);
-		mk += tmp;
+		alpha += tmp;
+	}
+	for(int i=0;i<policy.rowCnt;i++)
+	{
+		strcpy(fileName,policy.labels[i]);
+		strcat(fileName,".aRcv");
+		getPath(filePath,label,fileName);
+		cout<<"Loading "<<filePath<<" ..."<<endl;
+		sz = inputFromFile(buf,filePath);
+		Big tmp(buf);
+		a += tmp;
 	}
 	
-	getPath(filePath,label,"mk");
-	ostringstream oss;
-	oss<<mk;
-	outputToFile(oss.str().c_str(),filePath);
+	G1 g1_alpha = pfc.mult(g1,alpha);
 	
+	getPath(filePath,label,"g1alpha");
+	ofstream outg1alpha(filePath);
+	outg1alpha << g1_alpha.g<<endl;
+	
+	getPath(filePath,label,"alpha");
+	ofstream outalpha(filePath);
+	outalpha << alpha<<endl;
+	
+	getPath(filePath,label,"a");
+	ofstream outa(filePath);
+	outa << a <<endl;
+		
 	clearPolicy(policy);
 	
 	cout<<"End"<<endl;

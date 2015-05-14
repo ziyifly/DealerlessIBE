@@ -1,6 +1,8 @@
 #include "dealerlessTRE.h"
 #include <fstream>
 
+//#define DEBUG
+
 int loadCurve(const char* curveFile,ECn &G,Big &q,miracl* precision)
 {
 	char buf[500];
@@ -100,7 +102,7 @@ size_t inputFromFile(char* buf,const char* fileName)
 {
 	char* ptr = buf;
 	FILE *in = fopen(fileName,"r");
-	while(fgets(ptr,500,in)!=NULL)
+	while(fgets(ptr,5000,in)!=NULL)
 	{
 		ptr += strlen(ptr);
 		//cout<<buf<<endl;
@@ -143,15 +145,111 @@ ECn ECnFromStr(char* buf)
 	ptr = strtok(NULL,"(,)\n");
 	Big y(ptr);
 	ECn p(x,y);
+#ifdef DEBUG
+	cout<<"("<<x<<","<<y<<")"<<endl;
+	cout<<p<<endl;
+#endif
 	return p;
 }
-
-void hashBig(sha *s,Big x)
+ECn2 ECn2FromStr(char* buf)
 {
+	char* ptr = strtok(buf,"([,])\n");
+	Big a(ptr);
+	ptr = strtok(NULL,"([,])\n");
+	Big b(ptr);
+	ptr = strtok(NULL,"([,])\n");
+	Big c(ptr);
+	ptr = strtok(NULL,"([,])\n");
+	Big d(ptr);
+	
+	ZZn2 x(a,b),y(c,d);
+	ECn2 p;
+	p.set(x,y);
+	return p;
+}
+ZZn12 ZZn12FromStr(char* buf)
+{
+	Big num[12];
+	char* ptr = strtok(buf,"([,])\n");
+	num[0] = Big(ptr);
+	for(int i=1;i<12;i++)
+	{
+		ptr = strtok(NULL,"([,])\n");
+		num[i] = Big(ptr);
+	}
+	ZZn2 num2[6];
+	for(int i=0;i<6;i++)
+	{
+		num2[i] = ZZn2(num[2*i],num[2*i+1]);
+	}
+	ZZn4 a(num2[0],num2[1]),b(num2[2],num2[3]),c(num2[4],num2[5]);
+	return ZZn12(a,b,c);
+}
+G1 G1FromFile(const char* filePath)
+{
+	char buf[1000];
+	size_t sz = inputFromFile(buf,filePath);
+	ECn g = ECnFromStr(buf);
+	G1 g1;
+	g1.g = g;
+	return g1;
+}
+G2 G2FromFile(const char* filePath)
+{
+	char buf[1000];
+	size_t sz = inputFromFile(buf,filePath);
+	ECn2 g = ECn2FromStr(buf);
+	G2 g2;
+	g2.g = g;
+	return g2;
+}
+GT GTFromFile(const char* filePath)
+{
+	char buf[5000];
+	size_t sz = inputFromFile(buf,filePath);
+	ZZn12 g = ZZn12FromStr(buf);
+	GT gt;
+	gt.g = g;
+	return gt;
+}
+Big BigFromFile(const char* filePath)
+{
+	char buf[1000];
+	size_t sz = inputFromFile(buf,filePath);
+	Big num(buf);
+	return num;
+}
+
+void hashBig(Big x,char hash[20])
+{
+	sha sh;
+	shs_init(&sh);
     int ch;
     while (x!=0)
     {
         ch=x % 256; x /= 256;
-        shs_process(s,ch);
+        shs_process(&sh,ch);
     }
+	shs_hash(&sh,hash);
+}
+
+void aesEncrypt(char key[],char text[],size_t sz,char iv[])
+{
+	aes a;
+	aes_init(&a,MR_PCFB1,16,key,iv);
+	for(int j=0;j<sz;j++)
+	{
+		aes_encrypt(&a,&text[j]);
+	}
+	aes_end(&a);
+}
+void aesDecrypt(char key[],char text[],size_t sz,char iv[])
+{
+	aes a;
+	aes_init(&a,MR_PCFB1,16,key,iv);
+	for(int j=0;j<sz;j++)
+	{
+		aes_decrypt(&a,&text[j]);
+	}
+	aes_end(&a);
 }

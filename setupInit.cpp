@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <cstdlib>
 
+#include "pairing_3.h"
 #include "dealerlessTRE.h"
 
 #include <iostream>
@@ -9,7 +10,7 @@ using namespace std;
 
 const char* usage = "setupInit common label";
 
-Miracl precision = 20;
+//Miracl precision = 20;
 
 void showUsageAndExit()
 {
@@ -19,6 +20,9 @@ void showUsageAndExit()
 
 int main(int argc,const char** argv)
 {
+	PFC pfc(AES_SECURITY);
+	miracl *mip=get_mip();
+	
 	if(argc != 3)
 	{
 		showUsageAndExit();
@@ -29,9 +33,9 @@ int main(int argc,const char** argv)
 	
 	irand(time(NULL));
 	
-	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
-	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
-	//LSSSPolicy policy = loadPolicy(policyFile);
+	ECDSACurve ecdsaCurve = loadECDSACurve(common,mip);
+	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,mip);
+	mip->IOBASE = 16;
 	
 	ECDSASignKey sk(ecdsaCurve);
 	ECDSAVerifyKey vk = sk.getVerifyKey();
@@ -80,8 +84,6 @@ int main(int argc,const char** argv)
 	vk.toString(buf,500);
 	outputToFile(buf,filePath);
 	cout<<buf<<endl;
-	
-	//clearPolicy(policy);
 	
 	return 0;
 }

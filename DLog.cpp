@@ -1,4 +1,11 @@
-#include "LSSS.h"
+#include "DLog.h"
+
+PFC* _pfc;
+
+void DLogSetPFC(PFC* pfc)
+{
+	_pfc = pfc;
+}
 
 IntGroup& IntGroup::operator*=(IntGroup a)
 {
@@ -25,11 +32,6 @@ bool operator==(IntGroup a,IntGroup b)
 {
 	return a.num==b.num && a.n==b.n;
 }
-int IntGroup::toString(char*,size_t)
-{
-	return 0;
-}
-int IntGroup::toBinary(byte*,size_t){}
 //------------------------------------------------
 BigGroup& BigGroup::operator*=(BigGroup a)
 {
@@ -53,11 +55,6 @@ bool operator==(BigGroup a,BigGroup b)
 {
 	return a.num==b.num && a.n==b.n;
 }
-int BigGroup::toString(char*,size_t)
-{
-	return 0;
-}
-int BigGroup::toBinary(byte*,size_t){}
 //------------------------------------------------
 ECGroup& ECGroup::operator*=(ECGroup a)
 {
@@ -82,6 +79,7 @@ bool operator==(ECGroup a,ECGroup b)
 {
 	return a.p==b.p;
 }
+/*
 int ECGroup::toString(char* buf,size_t sz)
 {
 	//cout<<"in toString"<<endl;
@@ -99,6 +97,4 @@ int ECGroup::toString(char* buf,size_t sz)
 	*(ptr++) = '\0';
 	return ptr-buf;
 }
-int ECGroup::toBinary(byte*,size_t)
-{
-}
+*/

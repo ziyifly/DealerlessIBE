@@ -2,14 +2,16 @@
 #include <sys/types.h>
 #include <cstdlib>
 
+#include "pairing_3.h"
 #include "dealerlessTRE.h"
 
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 const char* usage = "setupInitVerify common label";
 
-Miracl precision = 20;
+//Miracl precision = 20;
 
 void showUsageAndExit()
 {
@@ -19,6 +21,9 @@ void showUsageAndExit()
 
 int main(int argc,const char** argv)
 {
+	PFC pfc(AES_SECURITY);
+	miracl *mip=get_mip();
+	
 	if(argc != 3)
 	{
 		showUsageAndExit();
@@ -31,8 +36,9 @@ int main(int argc,const char** argv)
 	size_t sz;
 	
 	cout<<"Loading curves..."<<endl;
-	ECDSACurve ecdsaCurve = loadECDSACurve(common,&precision);
-	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,&precision);
+	ECDSACurve ecdsaCurve = loadECDSACurve(common,mip);
+	ECElgamalCurve ecelgamalCurve = loadECElgamalCurve(common,mip);
+	mip->IOBASE = 16;
 	
 	getFileName(fileName,label,"ekSig");
 	getPath(filePath,"public",fileName);

@@ -1,6 +1,6 @@
 #include "CPABE.h"
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 Big *_lambda;
@@ -141,45 +141,6 @@ GT Waters_CPABESecretKey::decrypt(Waters_CPABECipherText ct,int* err)
 	
 	int* w = new int[attrCnt];
 	int _err = calcW(ct.policy,attrs,attrCnt,w,&t);
-	/*
-	cout<<"t = "<<t<<endl;
-	
-	G2 TC;
-	for (int i=0;i<attrCnt;i++)
-	{
-		cout << "w["<<i<<"]=  " << w[i] << endl;
-		for(int j=0;j<ct.policy.rowCnt;j++)
-		{
-			if(strcmp(attrs[i],ct.policy.labels[j]) == 0)
-			{
-				TC=TC+pfc.mult(ct.C[j],w[i]);
-				ct.D[j]=pfc.mult(ct.D[j],-w[i]);
-			}
-		}
-	}
-	TC=-TC;
-	
-	G2 **t2=new G2* [attrCnt+2];
-	G1 **t1=new G1* [attrCnt+2];
-
-	t2[0]=&ct.C_prime; t1[0]=&K;  // e(CD,K)
-	t2[1]=&TC; t1[1]=&L;  // e(TC,L)
-	for (int i=0;i<attrCnt;i++)
-	{
-		t2[i+2]=&Kx[i];
-		for(int j=0;j<ct.policy.rowCnt;j++)
-		{
-			if(strcmp(attrs[i],ct.policy.labels[j]) == 0)
-			{
-				t1[i+2]=&ct.D[j];
-			}
-		}
-	}
-	GT mask=pfc.multi_pairing(attrCnt+2,t2,t1);
-	GT M = ct.CT / mask;
-	
-	return M;
-	*/
 	
 	GT M,mask(1);
 	if(_err == RECONSTRBASE)

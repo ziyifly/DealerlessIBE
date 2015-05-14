@@ -1,3 +1,5 @@
+#include "pairing_3.h"
+
 #include "ECDSA.h"
 #include "ECElgamal.h"
 #include "LSSS.h"
@@ -21,6 +23,13 @@ size_t inputBinaryFromFile(BinaryData* buf,const char* fileName);
 void outputBinaryToFile(BinaryData buf,const char* fileName);
 
 ECn ECnFromStr(char* buf);
-Big BigFromStr(char* buf);
+ECn2 ECn2FromStr(char* buf);
+ZZn12 ZZn12FromStr(char* buf);
+G1 G1FromFile(const char* filePath);
+G2 G2FromFile(const char* filePath);
+GT GTFromFile(const char* filePath);
+Big BigFromFile(const char* filePath);
 
-void hashBig(sha *s,Big x);
+void hashBig(Big x,char symKeyBuf[20]);
+void aesEncrypt(char key[],char text[],size_t sz,char iv[]);
+void aesDecrypt(char key[],char text[],size_t sz,char iv[]);
