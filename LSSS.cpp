@@ -6,11 +6,65 @@
 #include <cstdio>
 #endif
 
-int gcd(int a,int b)
+PFC* pfc;
+
+void setLSSSPFC(PFC* _pfc)
 {
-	if((a%b)*(b%a)==0)
-		return (a%b)+(b%a);
-	return gcd(a%b,b%a);
+	pfc = _pfc;
+}
+
+template <class NumberType>
+NumberType innerProduct(NumberType** v,int* w,size_t len,int t=1)
+{
+	NumberType ip = 0;
+	for(int i=0;i<len;i++)
+	{
+		ip += *(v[i]) * w[i];
+	}
+	return ip/t;
+}
+
+template <>
+G1 innerProduct(G1** v,int* w,size_t len,int t)
+{
+	G1 ip;
+	for(int i=0;i<len;i++)
+	{
+		ip = ip + pfc->mult(*(v[i]), w[i]);
+	}
+	
+	if(t==1)
+		return ip;
+	else
+		return pfc->mult(ip,inverse(t,pfc->order()));
+}
+
+template <>
+G2 innerProduct(G2** v,int* w,size_t len,int t)
+{
+	G2 ip;
+	for(int i=0;i<len;i++)
+	{
+		ip = ip + pfc->mult(*(v[i]), w[i]);
+	}
+	if(t==1)
+		return ip;
+	else
+		return pfc->mult(ip,inverse(t,pfc->order()));
+}
+
+template <>
+GT innerProduct(GT** v,int* w,size_t len,int t)
+{
+	GT ip(1);
+	for(int i=0;i<len;i++)
+	{
+		ip = ip * pfc->power(*(v[i]), w[i]);
+	}
+	if(t==1)
+		return ip;
+	else
+		return pfc->power(ip,inverse(t,pfc->order()));
 }
 
 // rowSummand = rowSummand*mulS + rowAddend*mulA
@@ -190,6 +244,33 @@ int Share<SecretType>::toString(char* buf,size_t)
 	return strlen(buf);
 }
 
+template<>
+int Share<G1>::toString(char* buf,size_t)
+{
+	ostringstream out;
+	out<<share.g;
+	strcpy(buf,out.str().c_str());
+	return strlen(buf);
+}
+
+template<>
+int Share<G2>::toString(char* buf,size_t)
+{
+	ostringstream out;
+	out<<share.g;
+	strcpy(buf,out.str().c_str());
+	return strlen(buf);
+}
+
+template<>
+int Share<GT>::toString(char* buf,size_t)
+{
+	ostringstream out;
+	out<<share.g;
+	strcpy(buf,out.str().c_str());
+	return strlen(buf);
+}
+
 template<class SecretType>
 int Share<SecretType>::toBinary(byte*,size_t)
 {
@@ -255,12 +336,12 @@ int LSSS<SecretType>::genShares(Share<SecretType>** shares,size_t* shareCnt)
 		
 		for(i=0;i<policy.rowCnt;i++)
 		{
-			SecretType tmp = 0;     //*****TODO
-			for(j=0;j<policy.colCnt;j++)
+			SecretType** v1 = new SecretType*[policy.colCnt];
+			for(int j=0;j<policy.colCnt;j++)
 			{
-				tmp += r[j] * policy.A[i][j];
+				v1[j] = &r[j];
 			}
-			_shares[i].share = tmp;
+			_shares[i].share = innerProduct(v1,policy.A[i],policy.colCnt,1);
 			_shares[i].label = policy.labels[i];
 		}
 		*shares = _shares;
@@ -283,10 +364,18 @@ int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCn
 	int err = calcW(policy,shareLabels,shareCnt,w,&t);
 	if(err == RECONSTRBASE)
 	{
+		SecretType** v1 = new SecretType*[policy.colCnt];
+		for(int i=0;i<shareCnt;i++)
+		{
+			v1[i] = &shares[i].share;
+		}
+		*secret = innerProduct(v1,w,shareCnt,t);
+		/*
 		*secret = 0;
 		for(int i=0;i<shareCnt;i++)
 			*secret += shares[i].share * w[i];
 		*secret /= t;
+		*/
 	}
 	
 	return err;
@@ -297,8 +386,6 @@ int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCn
 template class LSSS<int>;
 template class LSSS<Big>;
 
-//template class LSSS<GT>;
-//template class LSSS<ECn>;
-
-//template class Share<Big>;
-//template class Share<ECn>;
+template class LSSS<G1>;
+template class LSSS<G2>;
+template class LSSS<GT>;

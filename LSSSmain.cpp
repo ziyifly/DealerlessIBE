@@ -3,8 +3,12 @@
 #include <cstring>
 #include <cstdlib>
 
+PFC pfc(AES_SECURITY);  // initialise PFC
+
 int main()
 {
+	miracl* mip=get_mip();
+	
 	LSSSPolicy policy;
 	
 	policy.rowCnt = 4;
@@ -27,7 +31,7 @@ int main()
 		sprintf(policy.labels[i],"label%d",i);
 	}
 	
-	LSSS<int> lsss (policy);
+	LSSS<int> lsss(policy);
 	
 	int secretVector[3] = {100,3,4};
 	lsss.setR(secretVector);

@@ -1,5 +1,4 @@
 #include "dealerlessTRE.h"
-#include <fstream>
 
 //#define DEBUG
 
@@ -252,4 +251,40 @@ void aesDecrypt(char key[],char text[],size_t sz,char iv[])
 		aes_decrypt(&a,&text[j]);
 	}
 	aes_end(&a);
+}
+
+size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz)
+{
+	size_t attrCnt = 0;
+	int d = strlen(releaseTimeStr);
+	for(int i=0;i<d;i++)
+	{
+		attrCnt += releaseTimeStr[i] - '0';
+	}
+	
+	if(sz<attrCnt)
+	{
+		attrCnt = 0;
+	}
+	else
+	{
+		char** tmp = attrs;
+		unsigned int releaseTime = atoi(releaseTimeStr);
+		char zeros[50] = {0};
+		
+		for(int i=0;i<d;i++)
+		{
+			int digit = releaseTime%10;
+			for(int j=1;j<=digit;j++)
+			{
+				*tmp = new char[i+2];
+				sprintf(*tmp,"%d%s",j,zeros);
+				tmp++;
+			}
+			releaseTime /= 10;
+			zeros[i] = '0';
+		}
+	}
+	
+	return attrCnt;
 }

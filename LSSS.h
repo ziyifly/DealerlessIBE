@@ -11,6 +11,8 @@
 #include <cstring>
 #include <cstdlib>
 
+void setLSSSPFC(PFC* pfc);
+
 struct LSSSPolicy: public Serialization
 {
 	int** A;

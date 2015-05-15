@@ -3,8 +3,12 @@
 #include "ECDSA.h"
 #include "ECElgamal.h"
 #include "LSSS.h"
+#include "CPABE.h"
 
 #include "miracl.h"
+
+#include <fstream>
+#include <cstring>
 
 int loadCurve(const char* curveFile,ECn &G,Big &q,miracl* precision);
 ECDSACurve loadECDSACurve(const char* curveFile,miracl* precision);
@@ -33,3 +37,5 @@ Big BigFromFile(const char* filePath);
 void hashBig(Big x,char symKeyBuf[20]);
 void aesEncrypt(char key[],char text[],size_t sz,char iv[]);
 void aesDecrypt(char key[],char text[],size_t sz,char iv[]);
+
+size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz);

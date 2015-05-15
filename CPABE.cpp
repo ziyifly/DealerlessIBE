@@ -21,7 +21,6 @@ Waters_CPABESecretKey Waters_CPABEMasterKey::genSecretKey(char** attrs,size_t at
 {
 	Big t;
 	pfc.random(t);
-	//t = 2;	//****** DEBUG
 	G1 K=g1_alpha+pfc.mult(pk.g1_a,t);
 	G1 L=pfc.mult(pk.g1,t);
 
