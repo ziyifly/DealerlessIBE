@@ -34,8 +34,11 @@ G2 G2FromFile(const char* filePath);
 GT GTFromFile(const char* filePath);
 Big BigFromFile(const char* filePath);
 
+LSSSPolicy policyFromReleaseTimeStr(const char* releaseTimeStr,int d);
+
 void hashBig(Big x,char symKeyBuf[20]);
 void aesEncrypt(char key[],char text[],size_t sz,char iv[]);
 void aesDecrypt(char key[],char text[],size_t sz,char iv[]);
+void aesEncryptFile(char key[],char iv[],const char inputFile[],const char outputFile[],bool encrypt);
 
 size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz);

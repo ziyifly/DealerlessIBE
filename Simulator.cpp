@@ -33,6 +33,7 @@ int main(int argc,char** argv)
 	
 	cout<<"Loading policy..."<<endl;
 	LSSSPolicy policy = loadPolicy(policyFileName);
+	cout << policy <<endl;
 	
 	cout<<"Loading g1..."<<endl;
 	getPath(filePath,"public","g1");
@@ -49,17 +50,10 @@ int main(int argc,char** argv)
 	GT egg = GTFromFile(filePath);
 	
 	Big a,alpha;
+	/*
 	Share<Big>* shares_a = new Share<Big>[policy.rowCnt];
 	Share<Big>* shares_alpha = new Share<Big>[policy.rowCnt];
 	LSSS<Big> lsss(policy);
-	for(int i=0;i<policy.rowCnt;i++)
-	{
-		getPath(filePath,policy.labels[i],"a");
-		cout<<"Loading "<<filePath<<" ..."<<endl;
-		shares_a[i].label = policy.labels[i];
-		shares_a[i].share = BigFromFile(filePath);
-	}
-	lsss.reconstructSecret(shares_a,policy.rowCnt,&a);
 	
 	for(int i=0;i<policy.rowCnt;i++)
 	{
@@ -69,8 +63,20 @@ int main(int argc,char** argv)
 		shares_alpha[i].share = BigFromFile(filePath);
 	}
 	lsss.reconstructSecret(shares_alpha,policy.rowCnt,&alpha);
+	cout << alpha <<endl;
 	
-	
+	for(int i=0;i<policy.rowCnt;i++)
+	{
+		getPath(filePath,policy.labels[i],"a");
+		cout<<"Loading "<<filePath<<" ..."<<endl;
+		shares_a[i].label = policy.labels[i];
+		shares_a[i].share = BigFromFile(filePath);
+	}
+	lsss.reconstructSecret(shares_a,policy.rowCnt,&a);
+	cout << a <<endl;
+	*/
+	a = BigFromFile("sim/a");
+	alpha = BigFromFile("sim/alpha");
 	cout<<"------------------ Verify ----------------------"<<endl;
 	
 	
@@ -129,6 +135,6 @@ int main(int argc,char** argv)
 	cout<<"left = "<<alpha<<endl;
 	cout<<"right= "<<rightalpha<<endl;
 	cout<<(alpha==rightalpha?"True":"False")<<endl<<endl;
-	
+
 	return 0;
 }

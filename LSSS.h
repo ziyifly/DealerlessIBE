@@ -22,6 +22,8 @@ struct LSSSPolicy: public Serialization
 	
 	int toString(char*,size_t);
 	int toBinary(byte*,size_t);
+	
+	friend ostream& operator<<(ostream&,const LSSSPolicy&);
 };
 
 template<class SecretType>

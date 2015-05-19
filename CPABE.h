@@ -6,9 +6,9 @@
 #include "LSSS.h"
 #include "pairing_3.h"
 
-G2 hashStrToG2(char*,PFC&);
+G2 hashStrToG2(char*,G2,PFC&);
 
-struct Waters_CPABECipherText: public Serialization
+struct Waters_CPABECipherText
 {
 	LSSSPolicy policy;
 	GT CT;
@@ -17,11 +17,8 @@ struct Waters_CPABECipherText: public Serialization
 	G1* D;
 	
 	Waters_CPABECipherText(LSSSPolicy policy,GT CT,G2 C_prime,G2* C,G1* D):policy(policy),CT(CT),C_prime(C_prime),C(C),D(D){};
-	
-	int toString(char*,size_t);
-	int toBinary(byte*,size_t);
 };
-class Waters_CPABEPublicKey: public Serialization
+class Waters_CPABEPublicKey
 {
 	public:
 		PFC& pfc;
@@ -35,12 +32,9 @@ class Waters_CPABEPublicKey: public Serialization
 		
 		Waters_CPABECipherText encrypt(GT M,LSSSPolicy policy,Big s=0);
 		
-		int toString(char*,size_t);
-		int toBinary(byte*,size_t);
-		
 		friend class Waters_CPABEMasterKey;
 };
-class Waters_CPABESecretKey: public Serialization
+class Waters_CPABESecretKey
 {
 	public:
 		PFC& pfc;
@@ -53,10 +47,8 @@ class Waters_CPABESecretKey: public Serialization
 	
 		GT decrypt(Waters_CPABECipherText,int*);
 		
-		int toString(char*,size_t);
-		int toBinary(byte*,size_t);
 };
-class Waters_CPABEMasterKey: public Serialization
+class Waters_CPABEMasterKey
 {
 	public:
 		PFC& pfc;
@@ -65,9 +57,6 @@ class Waters_CPABEMasterKey: public Serialization
 		Waters_CPABEMasterKey(PFC& pfc,G1 g1_alpha): pfc(pfc),g1_alpha(g1_alpha) {};
 		
 		Waters_CPABESecretKey genSecretKey(char** attrs,size_t attrCnt,Waters_CPABEPublicKey);
-		
-		int toString(char*,size_t);
-		int toBinary(byte*,size_t);
 };
 
 #endif

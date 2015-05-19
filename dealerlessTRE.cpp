@@ -219,6 +219,84 @@ Big BigFromFile(const char* filePath)
 	return num;
 }
 
+LSSSPolicy policyFromReleaseTimeStr(const char* releaseTimeStr,int max)
+{
+	LSSSPolicy policy;
+	
+	int len = strlen(releaseTimeStr);
+	char* rt = new char[max+1];
+	memset(rt,'0',(max-len));
+	memcpy(rt+(max-len),releaseTimeStr,len);
+	
+	policy.colCnt = max;
+	policy.rowCnt = 0;
+	
+	bool firstnz=false;
+	for(int i=0;i<max;i++)
+	{
+		if(rt[i] == '0')
+		{
+			if(!firstnz)
+			{
+				policy.rowCnt += 9;
+			}
+			policy.colCnt --;
+		}
+		else
+		{
+			firstnz = true;
+			policy.rowCnt += 10 - (rt[i] -'0');
+		}
+	}
+	
+	policy.labels = new char*[policy.rowCnt];
+	policy.A = new int*[policy.rowCnt];
+	for(int i=0;i<policy.rowCnt;i++)
+	{
+		policy.labels[i] = new char[len+1];
+		policy.A[i] = new int[policy.colCnt];
+		memset(policy.A[i],0,policy.colCnt*sizeof(int));
+	}
+	
+	int tp = 1;
+	for(int i=1;i<max;i++)
+	{
+		tp *= 10;
+	}
+	
+	int col = 0;
+	int row = 0;
+	firstnz=false;
+	for(int i=0;i<max;i++)
+	{
+		if(rt[i] != '0')
+			firstnz = true;
+		if(!firstnz || rt[i]!='0')
+		{
+			for(int c='9';c>'0';c--)
+			{
+				sprintf(policy.labels[row],"%d",tp*(c-'0'));
+				if(c == rt[i])
+				{
+					policy.A[row][col] = 1;
+					policy.A[row][col+1] = -1;
+					row++;
+					col++;
+					break;
+				}
+				else
+				{
+					policy.A[row][col] = 1;
+					row++;
+				}
+			}
+		}
+		tp /= 10;
+	}
+	
+	return policy;
+}
+
 void hashBig(Big x,char hash[20])
 {
 	sha sh;
@@ -251,6 +329,44 @@ void aesDecrypt(char key[],char text[],size_t sz,char iv[])
 		aes_decrypt(&a,&text[j]);
 	}
 	aes_end(&a);
+}
+void aesEncryptFile(char key[],char iv[],const char inputFile[],const char outputFile[],bool encrypt)
+{
+	char buf[1024];
+	FILE *bin=fopen(inputFile,"rb");
+	FILE *bout=fopen(outputFile,"wb");
+	
+	fseek (bin , 0 , SEEK_END);
+	size_t sz = ftell (bin);
+	rewind (bin);
+		
+	aes a;
+	aes_init(&a,MR_PCFB1,16,key,iv);
+		
+	while(1)
+	{
+		size_t bufsz = fread(buf,1,1024,bin);
+		for(int i=0;i<bufsz;i++)
+		{
+			if(encrypt)
+				aes_encrypt(&a,&buf[i]);
+			else
+				aes_decrypt(&a,&buf[i]);
+		}
+		fwrite(buf,1,bufsz,bout);
+		if(sz > 1024)
+		{
+			sz -= 1024;
+		}
+		else
+		{
+			break;
+		}
+	}
+	aes_end(&a);
+	
+	fclose(bin);
+	fclose(bout);
 }
 
 size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz)

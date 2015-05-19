@@ -81,16 +81,17 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 	int** GJmatrix;
 	int** originMatrix;
 	int i,j;
-	int* shareIndex = (int*)calloc(shareCnt,sizeof(int));
+	/*
+	int* shareIndex = new int[shareCnt];
 	for(i=0;i<shareCnt;i++)
 	{
 		shareIndex[i] = i;
 	}
-	
-	GJmatrix = (int**)calloc(shareCnt,sizeof(int*));
+	*/
+	GJmatrix = new int*[shareCnt];
 	for(i=0;i<shareCnt;i++)
 	{
-		GJmatrix[i] = (int*)calloc(shareCnt,sizeof(int));
+		GJmatrix[i] = new int[shareCnt];
 		for(j=0;j<shareCnt;j++)
 		{
 			GJmatrix[i][j]=0;
@@ -98,22 +99,30 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 		GJmatrix[i][i] = 1;
 	}
 	
-	originMatrix = (int**)calloc(shareCnt,sizeof(int*));
+	originMatrix = new int*[shareCnt];
 	for(i=0;i<shareCnt;i++)
 	{
-		originMatrix[i] = (int*)calloc(policy.colCnt,sizeof(int));
+		originMatrix[i] = new int[policy.colCnt];
 		for(j=0;j<policy.rowCnt;j++)
 		{
 			if(strcmp(shareLabels[i],policy.labels[j])==0)
 			{
-				memcpy(originMatrix[i],policy.A[j],policy.colCnt*sizeof(int));
+				for(int k=0;k<policy.colCnt;k++)
+				{
+					originMatrix[i][k] = policy.A[j][k];
+				}
+				// memcpy(originMatrix[i],policy.A[j],policy.colCnt*sizeof(int));
 				break;
 			}
 		}
 		if(j==policy.rowCnt)
 		{
+			for(int k=0;k<policy.colCnt;k++)
+			{
+				originMatrix[i][k] = 0;
+			}
 			//err = RECONSTRLABEL;
-			memset(originMatrix[i],0,policy.colCnt*sizeof(int));
+			//memset(originMatrix[i],0,policy.colCnt*sizeof(int));
 		}
 	}
 	
@@ -136,13 +145,12 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 #endif				
 			for(j=i;j<shareCnt && originMatrix[j][i]==0;j++);
 			
-			if(j==shareCnt)
+			if(j>=shareCnt)
 				continue;
 			
 			if(j!=i) //swap row
 			{
 				int* tmpRow;
-				//Share<SecretType> tmpSrt;
 				int tmpIndex;
 				
 				tmpRow = originMatrix[i];
@@ -151,14 +159,12 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 				
 				tmpRow = GJmatrix[i];
 				GJmatrix[i] = GJmatrix[j];
-				originMatrix[j] = tmpRow;
-				
-				//tmpSrt = shares[i];
-				//shares[i] = shares[j];
-				//shares[j] = tmpSrt;
+				GJmatrix[j] = tmpRow;
+				/*
 				tmpIndex = shareIndex[i];
 				shareIndex[i] = shareIndex[j];
 				shareIndex[j] = tmpIndex;
+				*/
 			}
 			
 			int scalarI = originMatrix[i][i];
@@ -173,18 +179,19 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 				rowAdd(originMatrix[j],scalarI,originMatrix[i],scalarJ,shareCnt);
 				rowAdd(GJmatrix[j],scalarI,GJmatrix[i],scalarJ,shareCnt);
 			}
+			
 		}
 #ifdef DEBUG
-			printf("origin\tGJ\n");
-			for(int k=0;k<shareCnt;k++)
-			{
-				for(int l=0;l<policy.colCnt;l++)
-					printf(" %d",originMatrix[k][l]);
-				printf("\t");
-				for(int l=0;l<shareCnt;l++)
-					printf(" %d",GJmatrix[k][l]);
-				printf("\n");
-			}
+		printf("origin\tGJ\n");
+		for(int k=0;k<shareCnt;k++)
+		{
+			for(int l=0;l<policy.colCnt;l++)
+				printf(" %d",originMatrix[k][l]);
+			printf("\t");
+			for(int l=0;l<shareCnt;l++)
+				printf(" %d",GJmatrix[k][l]);
+			printf("\n");
+		}
 #endif
 		if(originMatrix[0][0] == 0)
 			err = RECONSTRELIMAT;
@@ -192,31 +199,31 @@ int calcW(LSSSPolicy policy,char** shareLabels,size_t shareCnt,int* w,int* t)
 	
 	if(err == RECONSTRBASE)
 	{
-		for(i=1;i<shareCnt && originMatrix[0][i]==0;i++);
-		if(i!=shareCnt)
+		for(i=1;i<policy.colCnt && originMatrix[0][i]==0;i++);
+		if(i!=policy.colCnt)
 			err = RECONSTRELIMAT;
 	}
 	
 	if(err == RECONSTRBASE)
 	{
-		//*secret = 0;
+#ifdef DEBUG
+
+#endif
 		for(i=0;i<shareCnt;i++)
 		{
-			//*secret += shares[i].share * GJmatrix[0][i];
-			w[shareIndex[i]] = GJmatrix[0][i];
+			w[i] = GJmatrix[0][i];
 		}
-		//*secret /= originMatrix[0][0];
 		*t = originMatrix[0][0];
 	}
 	
 	for(i=0;i<shareCnt;i++)
 	{
-		free(originMatrix[i]);
-		free(GJmatrix[i]);
+		delete originMatrix[i];
+		delete GJmatrix[i];
 	}
-	free(originMatrix);
-	free(GJmatrix);
-	free(shareIndex);
+	delete originMatrix;
+	delete GJmatrix;
+	//delete shareIndex;
 	
 	return err;
 }
@@ -231,6 +238,21 @@ int LSSSPolicy::toString(char*,size_t)
 int LSSSPolicy::toBinary(byte*,size_t)
 {
 	return 0;
+}
+
+ostream& operator<<(ostream& out,const LSSSPolicy& policy)
+{
+	out << policy.rowCnt <<endl;
+	for(int i=0;i<policy.rowCnt;i++)
+	{
+		out<<policy.labels[i]<<":";
+		for(int j=0;j<policy.colCnt;j++)
+		{
+			out<<' '<<policy.A[i][j];
+		}
+		out<<endl;
+	}
+	out<<"--- policy end ---"<<endl;
 }
 
 // Share
@@ -303,8 +325,6 @@ int Share<Big>::toString(char* buf,size_t sz)
 template<class SecretType>
 LSSS<SecretType>::LSSS(LSSSPolicy policy) : policy(policy), secretSet(false){}
 
-//LSSS<GT>::LSSS(LSSSPolicy policy,PFC pfc) : policy(policy), secretSet(false),pfc(pfc){}
-
 template<class SecretType>
 int LSSS<SecretType>::setR(SecretType* r)
 {
@@ -353,8 +373,8 @@ int LSSS<SecretType>::genShares(Share<SecretType>** shares,size_t* shareCnt)
 template<class SecretType>
 int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCnt,SecretType* secret)
 {
-	char** shareLabels = (char**)calloc(shareCnt,sizeof(char*));
-	int* w = (int*)calloc(shareCnt,sizeof(int));
+	char** shareLabels = new char*[shareCnt];
+	int* w = new int[shareCnt];
 	int t;
 	for(int i=0;i<shareCnt;i++)
 	{
@@ -370,13 +390,10 @@ int LSSS<SecretType>::reconstructSecret(Share<SecretType>* shares,size_t shareCn
 			v1[i] = &shares[i].share;
 		}
 		*secret = innerProduct(v1,w,shareCnt,t);
-		/*
-		*secret = 0;
-		for(int i=0;i<shareCnt;i++)
-			*secret += shares[i].share * w[i];
-		*secret /= t;
-		*/
 	}
+	
+	delete shareLabels;
+	delete w;
 	
 	return err;
 }

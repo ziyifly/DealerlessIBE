@@ -20,7 +20,11 @@ G2 hashStrToG2(char* str,G2 g2,PFC& pfc)
 Waters_CPABESecretKey Waters_CPABEMasterKey::genSecretKey(char** attrs,size_t attrCnt,Waters_CPABEPublicKey pk)
 {
 	Big t;
+#ifdef DEBUG
+	t = 1;
+#else
 	pfc.random(t);
+#endif
 	G1 K=g1_alpha+pfc.mult(pk.g1_a,t);
 	G1 L=pfc.mult(pk.g1,t);
 
@@ -47,15 +51,6 @@ Waters_CPABESecretKey Waters_CPABEMasterKey::genSecretKey(char** attrs,size_t at
 	return sk;
 }
 
-int Waters_CPABEMasterKey::toString(char*,size_t)
-{
-	
-}
-int Waters_CPABEMasterKey::toBinary(byte*,size_t)
-{
-}
-//-------------------------------------------------
-
 Waters_CPABECipherText Waters_CPABEPublicKey::encrypt(GT M,LSSSPolicy policy,Big s)
 {
 	int m=policy.rowCnt,d=policy.colCnt;
@@ -64,10 +59,17 @@ Waters_CPABECipherText Waters_CPABEPublicKey::encrypt(GT M,LSSSPolicy policy,Big
 	Big *v=new Big [d];
 	Big *lambda=new Big [m];
 	Big *r=new Big [m];
+#ifdef DEBUG
+	for (int i=0;i<d;i++)
+	{
+		v[i] = 1;
+	}
+#else
 	for (int i=0;i<d;i++)
 	{
 		pfc.random(v[i]);
 	}
+#endif
 	
 	if(s==0)
 	{
@@ -77,12 +79,19 @@ Waters_CPABECipherText Waters_CPABEPublicKey::encrypt(GT M,LSSSPolicy policy,Big
 	{
 		v[0]=s;
 	}
-	
+
+#ifdef DEBUG
+	for (int i=0;i<m;i++)
+	{
+		r[i] = 1;
+	}
+#else	
 	for (int i=0;i<m;i++)
 	{
 		pfc.random(r[i]);
 	}
-	
+#endif
+
 	G2 *C=new G2 [m];
 	G1 *D=new G1 [m];
 
@@ -123,14 +132,6 @@ Waters_CPABECipherText Waters_CPABEPublicKey::encrypt(GT M,LSSSPolicy policy,Big
 #endif
 	return ct;
 }
-int Waters_CPABEPublicKey::toString(char*,size_t)
-{
-	
-}
-int Waters_CPABEPublicKey::toBinary(byte*,size_t)
-{
-}
-//-------------------------------------------------
 
 GT Waters_CPABESecretKey::decrypt(Waters_CPABECipherText ct,int* err)
 {
@@ -140,7 +141,13 @@ GT Waters_CPABESecretKey::decrypt(Waters_CPABECipherText ct,int* err)
 	
 	int* w = new int[attrCnt];
 	int _err = calcW(ct.policy,attrs,attrCnt,w,&t);
-	
+#ifdef DEBUG
+	for(int i=0;i<attrCnt;i++)
+	{
+		cout << "w[" << attrs[i] <<"] = "<<w[i]<<endl;
+	}
+	cout<<t<<endl;
+#endif
 	GT M,mask(1);
 	if(_err == RECONSTRBASE)
 	{
@@ -158,7 +165,7 @@ GT Waters_CPABESecretKey::decrypt(Waters_CPABECipherText ct,int* err)
 		}
 		mask = pfc.power(mask,inverse(t,order));
 #ifdef DEBUG
-		cout<<"egg_at^"<<1<<" = "<<pfc.power(*egg_at,1).g<<endl;
+		//cout<<"egg_at^"<<1<<" = "<<pfc.power(*egg_at,1).g<<endl;
 		cout<<mask.g<<endl;
 		//cout<<pfc.power(tmp,w[i]).g<<endl;
 #endif
@@ -191,18 +198,4 @@ GT Waters_CPABESecretKey::decrypt(Waters_CPABECipherText ct,int* err)
 
 	return M;
 }
-int Waters_CPABESecretKey::toString(char*,size_t)
-{
-	
-}
-int Waters_CPABESecretKey::toBinary(byte*,size_t)
-{
-}
-//-------------------------------------------------
-int Waters_CPABECipherText::toString(char*,size_t)
-{
-	
-}
-int Waters_CPABECipherText::toBinary(byte*,size_t)
-{
-}
+

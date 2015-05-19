@@ -12,8 +12,6 @@ using namespace std;
 
 const char* usage = "genSK label number(decimal)";
 
-PFC pfc(AES_SECURITY);  // initialise PFC
-
 void showUsageAndExit()
 {
 	cout<<usage<<endl;
@@ -22,6 +20,7 @@ void showUsageAndExit()
 
 int main(int argc,char** argv)
 {
+	PFC pfc(AES_SECURITY);  // initialise PFC
 	miracl* mip=get_mip();
 	
 	if(argc != 3)
