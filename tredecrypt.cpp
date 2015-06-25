@@ -14,7 +14,7 @@ char iv[16] = {0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
 
 const int MAX_LEN = 6;
 
-const char* usage = "tredecrypt number(decimal) file outputFile";
+const char* usage = "tredecrypt number(decimal) recver file outputFile";
 
 void showUsageAndExit()
 {
@@ -27,14 +27,15 @@ int main(int argc,char** argv)
 	PFC pfc(AES_SECURITY);  // initialise PFC
 	miracl* mip=get_mip();
 	
-	if(argc != 4)
+	if(argc != 5)
 	{
 		showUsageAndExit();
 	}
 	
 	const char* timeStr = argv[1];
-	const char* cipherDir = argv[2];
-	const char* output = argv[3];
+	const char* recverStr = argv[2];
+	const char* cipherDir = argv[3];
+	const char* output = argv[4];
 	
 	char filePath[100],fileName[100];
 	char dirPath[100];
@@ -56,6 +57,10 @@ int main(int argc,char** argv)
 	
 	getPath(filePath,"public","eggalpha");
 	GT eggalpha = GTFromFile(filePath);
+	
+	cout<<"Loading user secretKey"<<endl;
+	getPath(filePath,recverStr,"sk");
+	Big usk= BigFromFile(filePath);
 	
 	Waters_CPABEPublicKey pk(pfc,g1,g1a,g2,g2a,eggalpha);
 	
@@ -85,7 +90,6 @@ int main(int argc,char** argv)
 	}
 	Waters_CPABESecretKey sk(pfc,attrs,K,L,Kx,attrCnt);
 	
-	
 	cout<<"Loading cipherText"<<endl;
 	getPath(filePath,cipherDir,"releaseTime");
 	ifstream in(filePath);
@@ -93,6 +97,9 @@ int main(int argc,char** argv)
 	in>>releaseTimeStr;
 	LSSSPolicy policy = policyFromReleaseTimeStr(releaseTimeStr,MAX_LEN);
 	cout<<policy;
+	
+	getPath(filePath,cipherDir,"R");
+	G2 R = G2FromFile(filePath);
 	
 	getPath(filePath,cipherDir,"CT");
 	GT CT = GTFromFile(filePath);
@@ -116,7 +123,8 @@ int main(int argc,char** argv)
 	
 	cout<<"Decrypting"<<endl;
 	int err;
-	GT M = sk.decrypt(ct,&err);
+	GT M = sk.decrypt(ct,&err) / pfc.power(pfc.pairing(R,g1),usk);
+	
 	
 	if(err == 0)
 	{

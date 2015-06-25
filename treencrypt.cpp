@@ -14,7 +14,7 @@ char iv[16] = {0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
 
 const int MAX_LEN = 6;
 
-const char* usage = "treencrypt number(decimal) file outputFile";
+const char* usage = "treencrypt number(decimal) recver file outputFile";
 
 void showUsageAndExit()
 {
@@ -27,14 +27,15 @@ int main(int argc,char** argv)
 	PFC pfc(AES_SECURITY);  // initialise PFC
 	miracl* mip=get_mip();
 	
-	if(argc != 4)
+	if(argc != 5)
 	{
 		showUsageAndExit();
 	}
 	
 	const char* releaseTimeStr = argv[1];
-	const char* encryptFile = argv[2];
-	const char* outputDir = argv[3];
+	const char* recver = argv[2];
+	const char* encryptFile = argv[3];
+	const char* outputDir = argv[4];
 	
 	char filePath[100],fileName[100];
 	char dirPath[100];
@@ -47,7 +48,7 @@ int main(int argc,char** argv)
 	getPath(filePath,"public","g2");
 	G2 g2 = G2FromFile(filePath);
 	
-	cout<<"Loading pubKey"<<endl;
+	cout<<"Loading TRE pubKey"<<endl;
 	getPath(filePath,"public","g1a");
 	G1 g1a = G1FromFile(filePath);
 	
@@ -56,6 +57,10 @@ int main(int argc,char** argv)
 	
 	getPath(filePath,"public","eggalpha");
 	GT eggalpha = GTFromFile(filePath);
+	
+	cout<<"Loading user pubKey"<<endl;
+	getPath(filePath,recver,"pk");
+	G1 upk = G1FromFile(filePath);
 	
 	Waters_CPABEPublicKey pk(pfc,g1,g1a,g2,g2a,eggalpha);
 	
@@ -87,9 +92,19 @@ int main(int argc,char** argv)
 	out<<releaseTimeStr<<endl;
 	out.close();
 	
+	Big r;
+	pfc.random(r);
+	G2 R = pfc.mult(g2,r);
+	GT CT = ct.CT * pfc.power(pfc.pairing(g2,upk),r);
+	
 	getPath(filePath,outputDir,"CT");
 	out.open(filePath);
-	out<<ct.CT.g<<endl;
+	out<<CT.g<<endl;
+	out.close();
+	
+	getPath(filePath,outputDir,"R");
+	out.open(filePath);
+	out<<R.g<<endl;
 	out.close();
 	
 	getPath(filePath,outputDir,"C_prime");

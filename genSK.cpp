@@ -62,31 +62,7 @@ int main(int argc,char** argv)
 	Waters_CPABEPublicKey pk(pfc,g1,g1a,g2,g2a,eggalpha);
 	//----------------------------------
 	cout<<"Generating attributes"<<endl;
-/*	
-	size_t attrCnt = 0;
-	int d = strlen(releaseTimeStr);
-	for(int i=0;i<d;i++)
-	{
-		attrCnt += releaseTimeStr[i] - '0';
-	}
-	char** attrs = new char*[attrCnt];
-	char** tmp = attrs;
-	unsigned int releaseTime = atoi(releaseTimeStr);
-	char zeros[50] = {0};
-	
-	for(int i=0;i<d;i++)
-	{
-		int digit = releaseTime%10;
-		for(int j=1;j<=digit;j++)
-		{
-			*tmp = new char[i+2];
-			sprintf(*tmp,"%d%s",j,zeros);
-			tmp++;
-		}
-		releaseTime /= 10;
-		zeros[i] = '0';
-	}
-*/
+
 	char** attrs = new char*[100];
 	size_t attrCnt = getAttrsFromReleaseTime(releaseTimeStr,attrs,100);
 	

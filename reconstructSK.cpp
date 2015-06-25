@@ -90,14 +90,24 @@ int main(int argc,char** argv)
 		sharesg2[i].label = (char*)labels[i];
 	}
 	
+	cout<<"processing K"<<endl;
 	reconstructAndOutputG1(dirPath,labels,servCnt,"K",lsssg1,sharesg1);
+	cout<<"processing L"<<endl;
 	reconstructAndOutputG1(dirPath,labels,servCnt,"L",lsssg1,sharesg1);
 	
 	char** attrs = new char*[100];
 	size_t attrCnt = getAttrsFromReleaseTime(releaseTimeStr,attrs,100);
 	
+	cout<<"Attrs = {";
 	for(int i=0;i<attrCnt;i++)
 	{
+		cout<<" "<<attrs[i];
+	}
+	cout<<"}"<<endl;
+	
+	for(int i=0;i<attrCnt;i++)
+	{
+		cout<<attrs[i]<<endl;
 		reconstructAndOutputG2(dirPath,labels,servCnt,attrs[i],lsssg2,sharesg2);
 	}
 	

@@ -371,6 +371,19 @@ void aesEncryptFile(char key[],char iv[],const char inputFile[],const char outpu
 
 size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz)
 {
+	size_t attrCnt = strlen(releaseTimeStr);
+	unsigned int releaseTime = atoi(releaseTimeStr);
+	unsigned int p = 1;
+	
+	for(int i=0;i<attrCnt;i++)
+	{
+		attrs[i] = new char[10];
+		sprintf(attrs[i],"%u",(releaseTime%10)*p);
+		releaseTime/=10;
+		p *= 10;
+	}
+	
+	/*
 	size_t attrCnt = 0;
 	int d = strlen(releaseTimeStr);
 	for(int i=0;i<d;i++)
@@ -401,6 +414,6 @@ size_t getAttrsFromReleaseTime(const char* releaseTimeStr,char** attrs,size_t sz
 			zeros[i] = '0';
 		}
 	}
-	
+	*/
 	return attrCnt;
 }
